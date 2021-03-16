@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 
-namespace DataAccessLib
+namespace DataAccessLib.External
 {
     public class MSSqlDA : ISqlDA
     {

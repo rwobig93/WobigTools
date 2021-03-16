@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using DataAccessLib.External;
 using DataAccessLib.Models;
 
-namespace DataAccessLib
+namespace DataAccessLib.Queriables
 {
     public class PeopleData : IPeopleData
     {

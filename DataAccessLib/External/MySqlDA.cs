@@ -6,7 +6,7 @@ using Dapper;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 
-namespace DataAccessLib
+namespace DataAccessLib.External
 {
     public class MySqlDA : ISqlDA
     {

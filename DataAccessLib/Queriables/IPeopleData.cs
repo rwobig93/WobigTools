@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using DataAccessLib.Models;
 
-namespace DataAccessLib
+namespace DataAccessLib.Queriables
 {
     public interface IPeopleData
     {
