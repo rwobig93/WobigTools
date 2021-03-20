@@ -9,6 +9,7 @@ namespace WobigTools
         public static void Main(string[] args)
         {
             Core.InitializeLogger();
+
             CreateHostBuilder(args).Build().Run();
         }
 
