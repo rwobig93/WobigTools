@@ -4,17 +4,17 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using ArbitraryBot.Shared;
-using ArbitraryBot.Dto;
+using SharedLib.Dto;
+using SharedLib.General;
 
-namespace CoreLogicLib.Standard
+namespace SharedLib.IO
 {
     public static class OSDynamic
     {
         public static string GetStoragePath()
         {
             string basePath = "";
-            bool isWindows = OperatingSystem.IsWindows();
+            bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
             if (isWindows)
             {
                 var userPath = Environment.GetEnvironmentVariable(
@@ -30,7 +30,7 @@ namespace CoreLogicLib.Standard
             return basePath;
         }
 
-        internal static ProductAssembly GetProductAssembly(string assemblyPath = null)
+        public static ProductAssembly GetProductAssembly(string assemblyPath = null)
         {
             Assembly assy;
             Version version;
@@ -60,64 +60,48 @@ namespace CoreLogicLib.Standard
             };
         }
 
-        internal static Version GetRunningVersion()
+        public static Version GetRunningVersion()
         {
             return Assembly.GetExecutingAssembly().GetName().Version;
         }
 
-        internal static string GetConfigPath()
+        public static string GetConfigPath()
         {
             return Path.Combine(GetStoragePath(), "Config");
         }
 
-        internal static string GetLoggingPath()
+        public static string GetLoggingPath()
         {
             return Path.Combine(GetStoragePath(), "Logs");
         }
 
-        internal static string GetSavedDataPath()
+        public static string GetSavedDataPath()
         {
             return Path.Combine(GetStoragePath(), "SavedData");
         }
 
-        internal static string GetFilePath(string directory, string fileName)
+        public static string GetFilePath(string directory, string fileName)
         {
             return Path.Combine(directory, fileName);
         }
 
         public static OSPlatform GetCurrentOS()
         {
-            if (OperatingSystem.IsWindows())
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 return OSPlatform.Windows;
             }
-            else if (OperatingSystem.IsLinux())
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 return OSPlatform.Linux;
             }
-            else if (OperatingSystem.IsMacOS())
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 return OSPlatform.OSX;
             }
             else
             {
                 return OSPlatform.FreeBSD;
-            }
-        }
-
-        internal static void OpenPath(string directory)
-        {
-            if (OperatingSystem.IsWindows())
-            {
-                Process proc = new Process()
-                {
-                    StartInfo = new ProcessStartInfo()
-                    {
-                        FileName = "C:\\Windows\\explorer.exe",
-                        Arguments = directory
-                    }
-                };
-                proc.Start();
             }
         }
     }

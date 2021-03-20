@@ -10,7 +10,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace CoreLogicLib.Secure
+namespace SharedLib.Secure
 {
     public static class AESThenHMAC
     {

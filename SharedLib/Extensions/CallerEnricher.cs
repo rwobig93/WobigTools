@@ -5,9 +5,9 @@ using Serilog.Configuration;
 using Serilog.Core;
 using Serilog.Events;
 
-namespace CoreLogicLib.Extensions
+namespace SharedLib.Extensions
 {
-    class CallerEnricher : ILogEventEnricher
+    public class CallerEnricher : ILogEventEnricher
     {
         public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
         {
@@ -34,7 +34,7 @@ namespace CoreLogicLib.Extensions
         }
     }
 
-    static class LoggerCallerEnrichmentConfiguration
+    public static class LoggerCallerEnrichmentConfiguration
     {
         public static LoggerConfiguration WithCaller(this LoggerEnrichmentConfiguration enrichmentConfiguration)
         {

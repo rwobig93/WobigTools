@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DataAccessLib.Models
+namespace SharedLib.Dto
 {
     public class Alert
     {

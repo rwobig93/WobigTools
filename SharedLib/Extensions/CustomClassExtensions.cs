@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using ArbitraryBot.Shared;
-using ArbitraryBot.Dto;
 using Serilog;
+using SharedLib.Dto;
+using SharedLib.General;
 
-namespace CoreLogicLib.Extensions
+namespace SharedLib.Extensions
 {
     public static class CustomClassExtensions
     {

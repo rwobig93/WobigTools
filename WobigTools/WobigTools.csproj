@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CoreLogicLib\CoreLogicLib.csproj" />
     <ProjectReference Include="..\DataAccessLib\DataAccessLib.csproj" />
   </ItemGroup>
 

@@ -1,26 +1,31 @@
 ﻿using System;
-using ArbitraryBot.Extensions;
-using ArbitraryBot.Dto;
+using CoreLogicLib.Standard;
 using Hangfire;
-using Hangfire.MemoryStorage;
+using Hangfire.MySql;
+using Microsoft.Extensions.Configuration;
 using Serilog;
+using SharedLib.Dto;
+using SharedLib.Extensions;
 
 namespace CoreLogicLib.Auto
 {
     public static class Jobs
     {
+        public static IConfiguration _config;
         public static BackgroundJobServer BackgroundJobServer { set; get; }
-        public static StatusReturn InitializeJobService()
+        public static StatusReturn InitializeJobService(IConfiguration config)
         {
             try
             {
+                _config = config;
+
                 if (BackgroundJobServer != null)
                 {
                     Log.Warning("Background Job Server is already initialized and was attempted to be started");
                 }
                 else
                 {
-                    GlobalConfiguration.Configuration.UseMemoryStorage();
+                    GlobalConfiguration.Configuration.UseStorage(new MySqlStorage(_config.GetConnectionString("default"), new MySqlStorageOptions() { }));
                     BackgroundJobServer = new BackgroundJobServer();
                 }
                 return StatusReturn.Success;

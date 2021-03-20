@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DataAccessLib.Models
+namespace SharedLib.Dto
 {
     public class ProductAssembly
     {

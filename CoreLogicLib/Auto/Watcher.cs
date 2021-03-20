@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using ArbitraryBot.FrontEnd;
-using ArbitraryBot.Shared;
-using ArbitraryBot.Dto;
+using CoreLogicLib.Comm;
 using Serilog;
+using SharedLib.Dto;
+using SharedLib.General;
 
 namespace CoreLogicLib.Auto
 {
@@ -78,7 +78,6 @@ namespace CoreLogicLib.Auto
             catch (Exception ex)
             {
                 Log.Error("Error on tracker: [{Tracker}]{Error}", tracker.FriendlyName, ex.Message);
-                Handler.NotifyError(ex, tracker.FriendlyName);
             }
         }
 
@@ -86,8 +85,8 @@ namespace CoreLogicLib.Auto
         {
             try
             {
-                var updateChecked = WTUpdate.Updater.CheckForUpdate(OSDynamic.GetProductAssembly().ProductName);
-                Log.Debug("App update check success: {UpdateChecked}", updateChecked);
+                // TO-DO: Write new update process for webservice
+                Log.Debug("App update check success: {UpdateChecked}", true);
             }
             catch (Exception ex)
             {

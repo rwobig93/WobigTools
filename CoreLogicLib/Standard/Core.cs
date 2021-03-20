@@ -1,23 +1,20 @@
 ﻿using System;
 using Serilog;
 using Serilog.Events;
-using ArbitraryBot.Shared;
-using ArbitraryBot.Extensions;
-using System.Runtime.InteropServices;
-using ArbitraryBot.FrontEnd;
-using ArbitraryBot.Dto;
+using SharedLib.Dto;
+using SharedLib.IO;
+using SharedLib.General;
+using SharedLib.Extensions;
+using CoreLogicLib.Auto;
+using Microsoft.Extensions.Configuration;
 
 namespace CoreLogicLib.Standard
 {
     public static class Core
     {
-        internal static void InitializeLogger()
+        public static void InitializeLogger()
         {
-            if (Constants.DebugMode)
-            {
-                Constants.LogLevelCloud.MinimumLevel = LogEventLevel.Debug;
-                Constants.LogLevelLocal.MinimumLevel = LogEventLevel.Debug;
-            }
+            HouseKeeping.ValidateLoggingReqs();
 
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.Async(c => c.File($"{Constants.PathLogs}\\{OSDynamic.GetProductAssembly().ProductName}_.log", rollingInterval: RollingInterval.Day,
@@ -28,6 +25,7 @@ namespace CoreLogicLib.Standard
                 .WriteTo.Async(c => c.Seq("http://dev.wobigtech.net:5341", apiKey: Constants.LogUri, controlLevelSwitch: Constants.LogLevelCloud))
                 .Enrich.WithCaller()
                 .Enrich.WithThreadName()
+                .Enrich.WithThreadId()
                 .Enrich.FromLogContext()
                 .Enrich.WithMachineName()
                 .Enrich.WithEnvironmentUserName()
@@ -35,10 +33,6 @@ namespace CoreLogicLib.Standard
                 .Enrich.WithProperty("SessionID", Guid.NewGuid())
                 .Enrich.WithProperty("AppVersion", OSDynamic.GetProductAssembly().AppVersion)
                 .CreateLogger();
-
-            ChangeLoggingLevelLocal();
-            ChangeLoggingLevelCloud();
-            ChangeLoggingLevelConsole();
 
             Log.Information("==START-STOP== Application Started");
 
@@ -72,10 +66,10 @@ namespace CoreLogicLib.Standard
             Log.Information("Successfully backed up everything");
         }
 
-        public static void StartServices()
+        public static void StartServices(IConfiguration _config)
         {
             Log.Debug("Attempting to start all services");
-            Jobs.InitializeJobService();
+            Jobs.InitializeJobService(_config);
             Jobs.StartAllTimedJobs();
             //Watcher.StartWatcherThread();
             Log.Information("Finished Starting Services");
@@ -123,21 +117,6 @@ namespace CoreLogicLib.Standard
             Log.Information("Local Logging Set to: {LogLevel}", logLevel);
         }
 
-        internal static void ChangeLoggingLevelConsole(LogEventLevel logLevel = LogEventLevel.Error)
-        {
-
-            if (Constants.LogLevelConsole == null)
-            {
-                Constants.LogLevelConsole = new Serilog.Core.LoggingLevelSwitch(logLevel);
-                Log.Warning("Logging Level for console was null and had to be initialized");
-            }
-            else
-            {
-                Constants.LogLevelConsole.MinimumLevel = logLevel;
-            }
-            Log.Information("Console Logging Set to: {LogLevel}", logLevel);
-        }
-
         internal static void ChangeLoggingLevelCloud(LogEventLevel logLevel = LogEventLevel.Warning)
         {
             if (Constants.DebugMode)
@@ -160,29 +139,6 @@ namespace CoreLogicLib.Standard
             HouseKeeping.ValidateRunningMode();
             HouseKeeping.ValidateAllFilePaths(true);
             HouseKeeping.ValidateLoggingReqs();
-        }
-
-        internal static StatusReturn OpenDir(AppFile appFile)
-        {
-            try
-            {
-                if (OSDynamic.GetCurrentOS() == OSPlatform.Windows)
-                {
-                    var file = FileType.GetFileType(appFile);
-                    OSDynamic.OpenPath(file.Directory);
-                    return StatusReturn.Success;
-                }
-                else
-                {
-                    return StatusReturn.Failure;
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Failed to open directory");
-                Handler.NotifyError(ex, "OpenFolder");
-                return StatusReturn.Failure;
-            }
         }
 
         internal static StatusReturn LoadAllFiles()

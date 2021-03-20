@@ -4,16 +4,15 @@ using System.IO.Compression;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using ArbitraryBot.Dto;
-using ArbitraryBot.Extensions;
-using ArbitraryBot.FrontEnd;
-using ArbitraryBot.Shared;
 using MailKit.Net.Smtp;
 using MimeKit;
 using Newtonsoft.Json;
 using Serilog;
+using SharedLib.Dto;
+using SharedLib.Extensions;
+using SharedLib.General;
 
-namespace CoreLogicLib.Secure
+namespace CoreLogicLib.Comm
 {
     public static class Communication
     {
@@ -61,7 +60,6 @@ namespace CoreLogicLib.Secure
             catch (Exception ex)
             {
                 Log.Error(ex, "Error occured on email alert");
-                Handler.NotifyError($"Error on Tracker Alert: [{tracker.FriendlyName}] {ex.Message}");
             }
         }
 
@@ -109,7 +107,6 @@ namespace CoreLogicLib.Secure
             catch (Exception ex)
             {
                 Log.Error(ex, "Failure occured when attempting to send tracker alert webhook", tracker);
-                Handler.NotifyError(ex, "Alert");
             }
         }
 

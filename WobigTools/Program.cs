@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using CoreLogicLib.Standard;
 
 namespace WobigTools
 {
@@ -13,6 +8,7 @@ namespace WobigTools
     {
         public static void Main(string[] args)
         {
+            Core.InitializeLogger();
             CreateHostBuilder(args).Build().Run();
         }
 

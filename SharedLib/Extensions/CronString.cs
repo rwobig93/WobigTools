@@ -1,4 +1,4 @@
-﻿namespace CoreLogicLib.Extensions
+﻿namespace SharedLib.Extensions
 {
     public static class CronString
     {

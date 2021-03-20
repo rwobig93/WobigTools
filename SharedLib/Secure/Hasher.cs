@@ -3,7 +3,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
 
-namespace CoreLogicLib.Secure
+namespace SharedLib.Secure
 {
     public sealed class Hasher : IHasher
     {

@@ -1,4 +1,4 @@
-﻿namespace CoreLogicLib.Standard
+﻿namespace SharedLib.Dto
 {
     public enum StatusReturn
     {

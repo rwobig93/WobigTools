@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using Serilog;
-using ArbitraryBot.Shared;
 using System.IO;
-using Nito.AsyncEx.Synchronous;
-using ArbitraryBot.FrontEnd;
-using ArbitraryBot.Dto;
+using DataAccessLib.Models;
+using SharedLib.Dto;
+using SharedLib.General;
+using CoreLogicLib.Comm;
 
 namespace CoreLogicLib.Standard
 {
@@ -44,7 +44,6 @@ namespace CoreLogicLib.Standard
                         if (!initial)
                         {
                             Log.Error(ex, "Unable to create required directory");
-                            Handler.NotifyError(ex, "FolderCreate");
                         }
                     }
                 }
@@ -58,7 +57,6 @@ namespace CoreLogicLib.Standard
                 if (!initial)
                 {
                     Log.Error(ex, "Failed to validate all file paths");
-                    Handler.NotifyError(ex, "FolderCreate");
                 }
             }
         }
@@ -93,7 +91,6 @@ namespace CoreLogicLib.Standard
             catch (Exception ex)
             {
                 Log.Error(ex, "Failed to cleanup old {FileName} files", appFile);
-                Handler.NotifyError(ex, "FileCleanup");
             }
         }
 
@@ -111,7 +108,6 @@ namespace CoreLogicLib.Standard
                     catch (Exception ex)
                     {
                         Log.Error(ex, "Failed to backup the current configuration");
-                        Handler.NotifyError(ex, "ConfigBackup");
                     }
                     break;
                 case AppFile.Log:
@@ -128,7 +124,6 @@ namespace CoreLogicLib.Standard
                     catch (Exception ex)
                     {
                         Log.Error(ex, "Failed to backup the current saved data set");
-                        Handler.NotifyError(ex, "DataBackup");
                     }
                     break;
             }
@@ -142,7 +137,7 @@ namespace CoreLogicLib.Standard
                 if (Constants.DebugMode)
                     url = "https://wobigtech.net/public/public1.txt";
 
-                var webReq = Communication.GetWebFileContentsUncompressed(url).WaitAndUnwrapException();
+                var webReq = Communication.GetWebFileContentsUncompressed(url).Result;
                 if (!string.IsNullOrWhiteSpace(webReq.WebpageContents))
                 {
                     Constants.LogUri = webReq.WebpageContents.Replace("\n", "");
@@ -153,7 +148,6 @@ namespace CoreLogicLib.Standard
                 if (Log.Logger != null)
                 {
                     Log.Error(ex, "Failure occured during logging req acquisition: {Error}", ex.Message);
-                    Handler.NotifyError(ex, "Logging");
                 }
             }
         }

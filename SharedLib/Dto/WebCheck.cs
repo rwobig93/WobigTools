@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace DataAccessLib.Models
+namespace SharedLib.Dto
 {
     public class WebCheck
     {

@@ -1,4 +1,4 @@
-﻿namespace CoreLogicLib.Secure
+﻿namespace SharedLib.Secure
 {
     public interface IHasher
     {
