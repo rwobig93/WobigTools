@@ -137,7 +137,7 @@ namespace CoreLogicLib.Standard
                 if (Constants.DebugMode)
                     url = "https://wobigtech.net/public/public1.txt";
 
-                var webReq = Communication.GetWebFileContentsUncompressed(url).Result;
+                var webReq = Web.GetWebFileContentsUncompressed(url).Result;
                 if (!string.IsNullOrWhiteSpace(webReq.WebpageContents))
                 {
                     Constants.LogUri = webReq.WebpageContents.Replace("\n", "");
