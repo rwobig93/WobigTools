@@ -2,7 +2,19 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Company>Wobigtech</Company>
+    <Authors>Rick Wobig</Authors>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Types\**" />
+    <EmbeddedResource Remove="Types\**" />
+    <None Remove="Types\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.78" />
@@ -13,10 +25,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SharedLib\SharedLib.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Types\" />
   </ItemGroup>
 
 </Project>

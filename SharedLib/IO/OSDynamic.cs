@@ -17,7 +17,7 @@ namespace SharedLib.IO
                 RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
                 "LOCALAPPDATA" : "Home");
             ProductAssembly proAss = GetProductAssembly();
-            string basePath = Path.Combine(Path.Combine(userPath, proAss.CompanyName), proAss.ProductName);
+            string basePath = Path.Combine(Path.Combine(userPath, proAss.CompanyName), "WobigTools");
             if (Constants.DebugMode)
                 basePath = Path.Combine(basePath, "Test");
             else

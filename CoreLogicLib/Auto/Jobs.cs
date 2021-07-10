@@ -13,12 +13,10 @@ namespace CoreLogicLib.Auto
     {
         public static IConfiguration _config;
         public static BackgroundJobServer BackgroundJobServer { set; get; }
-        public static StatusReturn InitializeJobService(IConfiguration config)
+        public static StatusReturn InitializeJobService()
         {
             try
             {
-                _config = config;
-
                 if (BackgroundJobServer != null)
                 {
                     Log.Warning("Background Job Server is already initialized and was attempted to be started");

@@ -16,8 +16,11 @@ namespace CoreLogicLib.Standard
         {
             HouseKeeping.ValidateLoggingReqs();
 
+            var testString = $"{Constants.PathLogs}\\WobigTools_.log";
+            var logUri = $"{Constants.LogUri}";
+
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.Async(c => c.File($"{Constants.PathLogs}\\{OSDynamic.GetProductAssembly().ProductName}_.log", rollingInterval: RollingInterval.Day,
+                .WriteTo.Async(c => c.File($"{Constants.PathLogs}\\WobigTools_.log", rollingInterval: RollingInterval.Day,
                   fileSizeLimitBytes: 10000000,
                   rollOnFileSizeLimit: true,
                   outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
@@ -66,23 +69,23 @@ namespace CoreLogicLib.Standard
             Log.Information("Successfully backed up everything");
         }
 
-        public static void StartServices(IConfiguration _config)
+        public static void StartServices()
         {
             Log.Debug("Attempting to start all services");
-            Jobs.InitializeJobService(_config);
+            Jobs.InitializeJobService();
             Jobs.StartAllTimedJobs();
             //Watcher.StartWatcherThread();
             Log.Information("Finished Starting Services");
         }
 
-        internal static void ProcessSettingsFromConfig()
+        public static void ProcessSettingsFromConfig()
         {
             HouseKeeping.ValidateAllFilePaths();
             CleanupAllOldFiles();
             // TODO: Put setting changes from config load
         }
 
-        internal static void InitializeFirstRun()
+        public static void InitializeFirstRun()
         {
             Config.CreateNew();
             SavedData.CreateNew();
@@ -134,14 +137,14 @@ namespace CoreLogicLib.Standard
             Log.Information("Cloud Logging Set to: {LogLevel}", logLevel);
         }
 
-        internal static void InitializeApp()
+        public static void InitializeApp()
         {
             HouseKeeping.ValidateRunningMode();
             HouseKeeping.ValidateAllFilePaths(true);
             HouseKeeping.ValidateLoggingReqs();
         }
 
-        internal static StatusReturn LoadAllFiles()
+        public static StatusReturn LoadAllFiles()
         {
             StatusReturn confStatus = Config.Load();
             StatusReturn saveStatus = SavedData.Load();

@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using WobigTools.Data;
 
-
 namespace WobigTools
 {
     public class Startup

@@ -1,17 +1,92 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
-
+/*
+    --material-background: #121212;
+    --material-primary: #BB86FC;
+    --material-primary-v: #3700B3;
+    --material-secondary: #03DAC6;
+    --material-error: #CF6679;
+    --wobigtech-accent: #76B900;
+    --wobigtech-color: #898989;
+    --wobigtech-background: #040404;
+*/
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: #898989;
+    background-color: #1A191D;
 }
 
 a, .btn-link {
-    color: #0366d6;
+    color: #76B900;
 }
 
 .btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    color: #BB86FC;
+    background-color: #121212;
+    border-color: #BB86FC;
+}
+
+    .btn-primary:hover {
+        color: #121212;
+        background-color: #BB86FC;
+        border-color: #121212;
+    }
+
+    .btn-primary.focus, .btn-primary:focus {
+        color: #121212;
+        background-color: #BB86FC;
+        border-color: #BB86FC;
+        box-shadow: none;
+    }
+
+    .btn-primary:not(:disabled):not(.disabled).active, .btn-primary:not(:disabled):not(.disabled):active, .show > .btn-primary.dropdown-toggle {
+        color: #BB86FC;
+        background-color: #121212;
+        border-color: #121212;
+    }
+
+        .btn-primary:not(:disabled):not(.disabled).active:focus, .btn-primary:not(:disabled):not(.disabled):active:focus, .show > .btn-primary.dropdown-toggle:focus {
+            box-shadow: none;
+        }
+
+.table {
+    color: #898989;
+    border-color: #76B900;
+    border-radius: 6px;
+    -moz-border-radius: 6px;
+}
+
+    .table td, .table th {
+        color: #898989;
+        border-color: #76B900;
+        padding: .75rem;
+        vertical-align: top;
+    }
+
+    .table thead th {
+        vertical-align: bottom;
+        border-color: #76B900;
+    }
+
+    .table tbody + tbody {
+        border-top: 1px solid #76B900;
+        border-bottom: 1px solid #76B900;
+    }
+
+.table-bordered td, .table-bordered th {
+    border: 1px solid #76B900
+}
+
+.table-dark {
+    color: inherit
+}
+
+    .table-dark tbody + tbody, .table-dark td, .table-dark th, .table-dark thead th {
+        border-color: #76B900;
+    }
+
+.table .thead-dark th {
+    color: inherit;
+    border-color: #76B900;
 }
 
 .content {

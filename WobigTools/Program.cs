@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using CoreLogicLib.Standard;
+using SharedLib.Dto;
 
 namespace WobigTools
 {
@@ -8,7 +9,14 @@ namespace WobigTools
     {
         public static void Main(string[] args)
         {
+            Core.InitializeApp();
             Core.InitializeLogger();
+            if (Core.LoadAllFiles() != StatusReturn.Success)
+            {
+                Core.InitializeFirstRun();
+            }
+            Core.ProcessSettingsFromConfig();
+            Core.StartServices();
 
             CreateHostBuilder(args).Build().Run();
         }
