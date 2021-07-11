@@ -1,0 +1,94 @@
+﻿@page "/Watchers/List"
+
+@using WobigTools.Models
+@using SharedLib.Dto
+@using SharedLib.General
+
+<h4>Add New Watcher</h4>
+<EditForm Model="@newProduct" OnValidSubmit="@AddWatcher">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <table class="table">
+        <tbody>
+            <tr><td width="15%">Friendly Name:</td><td width="85%"><InputText style="width: 100%;" id="friendlyname" @bind-Value="newProduct.FriendlyName" /></td></tr>
+            <tr><td width="15%">Page URL:</td><td width="85%"><InputText style="width: 100%;" id="pageurl" @bind-Value="newProduct.PageURL" /></td></tr>
+            <tr><td width="15%">Keyword:</td><td width="85%"><InputText style="width: 100%;" id="keyword" @bind-Value="newProduct.Keyword" /></td></tr>
+        </tbody>
+    </table>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</EditForm>
+
+<h3>Watchers List</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Friendly Name</th>
+            <th>Enabled</th>
+            <th>Keyword</th>
+            <th>Check Interval</th>
+            <th>Page URL</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in Constants.SavedData.TrackedProducts)
+        {
+            <tr>
+                <td>@product.FriendlyName</td>
+                <td>@product.Enabled</td>
+                <td>@product.Keyword</td>
+                <td>@product.CheckInterval</td>
+                <td>@product.PageURL</td>
+                <td>
+                    <button disabled class="btn btn-secondary" @onclick="(() => EditWatcher(product))">Edit</button>
+                    <button class="btn btn-warning" @onclick="(() => DeleteWatcher(product))">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private DisplayTrackedProductModel newProduct = new DisplayTrackedProductModel();
+
+    protected override async Task OnInitializedAsync()
+    {
+
+    }
+
+    private async Task AddWatcher()
+    {
+        TrackedProduct p = new TrackedProduct()
+        {
+            FriendlyName = newProduct.FriendlyName,
+            PageURL = newProduct.PageURL,
+            Keyword = newProduct.Keyword,
+            AlertOnKeywordNotExist = true,
+            Enabled = true
+        };
+        if (Constants.SavedData.TrackedProducts.Find(x =>
+        x.PageURL == p.PageURL &&
+        x.Keyword == p.Keyword) != null)
+        {
+            Constants.DebugLog.AddMessage($"Dupe watcher: '{p.Keyword}' on {p.PageURL}, update the existing watcher or enter a new one");
+        }
+        else
+        {
+            Constants.SavedData.TrackedProducts.Add(p);
+            SavedData.Save();
+
+            newProduct = new DisplayTrackedProductModel();
+        }
+    }
+
+    private async Task EditWatcher(TrackedProduct product)
+    {
+
+    }
+
+    private async Task DeleteWatcher(TrackedProduct product)
+    {
+        Constants.DebugLog.AddMessage($"We're trying to delete tracked watcher: {product.FriendlyName}");
+    }
+}

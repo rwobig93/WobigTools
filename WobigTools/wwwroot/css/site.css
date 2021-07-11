@@ -8,11 +8,13 @@
     --wobigtech-accent: #76B900;
     --wobigtech-color: #898989;
     --wobigtech-background: #040404;
+    --wobigtech-warning: #CC1212;
 */
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     color: #898989;
     background-color: #1A191D;
+    /*background-image: url(Images/network-dots.jpg);*/
 }
 
 a, .btn-link {
@@ -31,27 +33,100 @@ a, .btn-link {
         border-color: #121212;
     }
 
-    .btn-primary.focus, .btn-primary:focus {
+    .btn-primary.focus,
+    .btn-primary:focus {
         color: #121212;
         background-color: #BB86FC;
         border-color: #BB86FC;
         box-shadow: none;
     }
 
-    .btn-primary:not(:disabled):not(.disabled).active, .btn-primary:not(:disabled):not(.disabled):active, .show > .btn-primary.dropdown-toggle {
+    .btn-primary:not(:disabled):not(.disabled).active,
+    .btn-primary:not(:disabled):not(.disabled):active,
+    .show > .btn-primary.dropdown-toggle {
         color: #BB86FC;
         background-color: #121212;
         border-color: #121212;
     }
 
-        .btn-primary:not(:disabled):not(.disabled).active:focus, .btn-primary:not(:disabled):not(.disabled):active:focus, .show > .btn-primary.dropdown-toggle:focus {
+        .btn-primary:not(:disabled):not(.disabled).active:focus,
+        .btn-primary:not(:disabled):not(.disabled):active:focus,
+        .show > .btn-primary.dropdown-toggle:focus {
+            box-shadow: none;
+        }
+
+.btn-secondary {
+    color: #03DAC6;
+    background-color: #121212;
+    border-color: #03DAC6;
+}
+
+    .btn-secondary:hover {
+        color: #121212;
+        background-color: #03DAC6;
+        border-color: #121212;
+    }
+
+    .btn-secondary.focus,
+    .btn-secondary:focus {
+        color: #121212;
+        background-color: #03DAC6;
+        border-color: #03DAC6;
+        box-shadow: none;
+    }
+
+    .btn-secondary:not(:disabled):not(.disabled).active,
+    .btn-secondary:not(:disabled):not(.disabled):active,
+    .show > .btn-secondary.dropdown-toggle {
+        color: #03DAC6;
+        background-color: #121212;
+        border-color: #121212;
+    }
+
+        .btn-secondary:not(:disabled):not(.disabled).active:focus,
+        .btn-secondary:not(:disabled):not(.disabled):active:focus,
+        .show > .btn-secondary.dropdown-toggle:focus {
+            box-shadow: none;
+        }
+
+.btn-warning {
+    color: #CC1212;
+    background-color: #121212;
+    border-color: #CC1212;
+}
+
+    .btn-warning:hover {
+        color: #121212;
+        background-color: #CC1212;
+        border-color: #121212;
+    }
+
+    .btn-warning.focus,
+    .btn-warning:focus {
+        color: #121212;
+        background-color: #CC1212;
+        border-color: #CC1212;
+        box-shadow: none;
+    }
+
+    .btn-warning:not(:disabled):not(.disabled).active,
+    .btn-warning:not(:disabled):not(.disabled):active,
+    .show > .btn-warning.dropdown-toggle {
+        color: #CC1212;
+        background-color: #121212;
+        border-color: #121212;
+    }
+
+        .btn-warning:not(:disabled):not(.disabled).active:focus,
+        .btn-warning:not(:disabled):not(.disabled):active:focus,
+        .show > .btn-warning.dropdown-toggle:focus {
             box-shadow: none;
         }
 
 input {
     color: #BB86FC;
     background-color: #121212;
-    border-radius: 10px;
+    border-radius: 8px;
     border-color: #BB86FC;
     box-shadow: none;
 }
@@ -64,17 +139,14 @@ input {
     }
 
     input:focus-visible, input.focus-visible,
-    input:valid, input.valid {
+    input:valid, input.valid,
+    input:not(:disabled):not(.disabled).active, 
+    input:not(:disabled):not(.disabled):active {
         color: #BB86FC;
         background-color: #121212;
         border-color: #BB86FC;
         box-shadow: none !important;
-    }
-
-    input:not(:disabled):not(.disabled).active, input:not(:disabled):not(.disabled):active {
-        color: #BB86FC;
-        background-color: #121212;
-        border-color: #121212;
+        outline: none;
     }
 
 .table {
@@ -101,7 +173,8 @@ input {
         border-bottom: 1px solid #76B900;
     }
 
-.table-bordered td, .table-bordered th {
+.table-bordered td,
+.table-bordered th {
     border: 1px solid #76B900
 }
 
@@ -109,7 +182,10 @@ input {
     color: inherit
 }
 
-    .table-dark tbody + tbody, .table-dark td, .table-dark th, .table-dark thead th {
+    .table-dark tbody + tbody,
+    .table-dark td,
+    .table-dark th,
+    .table-dark thead th {
         border-color: #76B900;
     }
 
@@ -132,6 +208,21 @@ input {
 
 .validation-message {
     color: red;
+}
+
+.textarea {
+    border: 1px groove #76B900;
+    border-radius: 5px;
+    width: 95%;
+    height: auto;
+    min-height: 490px;
+    overflow: auto;
+    background: #040404;
+}
+
+.display-message {
+    color: #BB86FC;
+    border: 0.5px hidden #BB86FC;
 }
 
 #blazor-error-ui {

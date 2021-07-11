@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 using Serilog.Core;
 using SharedLib.Dto;
 using SharedLib.IO;
@@ -19,6 +20,8 @@ namespace SharedLib.General
         public static string LogUri { get; set; }
         public static string WebHookAvatarURL { get; set; } = "https://wobigtech.net/wp-content/uploads/2020/10/WobigIconnoBack-50x50.png";
         public static List<string> Notifications { get; set; } = new List<string>(5);
+        public static MessageHandler DebugLog { get; set; } = new MessageHandler();
+        public static MessageHandler WatcherEvents { get; set; } = new MessageHandler(messageCountMax: 100);
         // Bools
         public static bool CloseApp { get; set; } = false;
         public static bool DebugMode { get; set; } = false;

@@ -17,7 +17,7 @@ namespace SharedLib.IO
                 RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
                 "LOCALAPPDATA" : "Home");
             ProductAssembly proAss = GetProductAssembly();
-            string basePath = Path.Combine(Path.Combine(userPath, proAss.CompanyName), "WobigTools");
+            string basePath = Path.Combine(Path.Combine(userPath, proAss.CompanyName), proAss.ProductName);
             if (Constants.DebugMode)
                 basePath = Path.Combine(basePath, "Test");
             else
@@ -33,8 +33,8 @@ namespace SharedLib.IO
             string productName;
             bool isBeta;
             if (assemblyPath == null)
-            {
-                assy = Assembly.GetExecutingAssembly();
+            { 
+                assy = Assembly.GetEntryAssembly(); // GetExecutingAssembly -or GetEntryAssembly
                 companyName = assy.GetCustomAttributes<AssemblyCompanyAttribute>().FirstOrDefault().Company;
                 productName = assy.GetCustomAttribute<AssemblyProductAttribute>().Product;
                 version = assy.GetName().Version;

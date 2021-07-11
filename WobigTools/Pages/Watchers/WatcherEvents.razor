@@ -1,0 +1,27 @@
+﻿@page "/Watchers/Events"
+@using SharedLib.General
+
+<h3>WatcherEvents</h3>
+
+<div class="textarea">
+    @foreach (var line in Constants.WatcherEvents.Messages)
+    {
+        <div class="display-message">@line</div>
+    }
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Constants.WatcherEvents.MessagesChanged += IndexAsyncHandler;
+    }
+
+    private async void IndexAsyncHandler()
+    {
+        await InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
+    }
+}

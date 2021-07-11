@@ -27,4 +27,10 @@
         OneMin,
         FiveMin
     }
+
+    public enum MessagePrefix
+    {
+        Log,
+        None
+    }
 }

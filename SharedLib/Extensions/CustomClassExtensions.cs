@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
 using Serilog;
 using SharedLib.Dto;
 using SharedLib.General;
@@ -11,17 +14,17 @@ namespace SharedLib.Extensions
         {
             TrackedProduct foundTracker;
 
-            Log.Debug("Adding or updating tracker on the {Interval} queue: {Tracker}", tracker.AlertInterval, tracker.FriendlyName);
+            Log.Debug("Adding or updating tracker on the {Interval} queue: {Tracker}", tracker.CheckInterval, tracker.FriendlyName);
             foundTracker = Constants.SavedData.TrackedProducts.Find(x => x.TrackerID == tracker.TrackerID);
             if (foundTracker != null)
             {
                 foundTracker = tracker;
-                Log.Debug("Updated tracker on the {Interval} queue: {Tracker}", tracker.AlertInterval, tracker.FriendlyName);
+                Log.Debug("Updated tracker on the {Interval} queue: {Tracker}", tracker.CheckInterval, tracker.FriendlyName);
             }
             else
             {
                 Constants.SavedData.TrackedProducts.Add(tracker);
-                Log.Debug("Added tracker on the {Interval} queue: {Tracker}", tracker.AlertInterval, tracker.FriendlyName);
+                Log.Debug("Added tracker on the {Interval} queue: {Tracker}", tracker.CheckInterval, tracker.FriendlyName);
             }
         }
 
@@ -29,16 +32,16 @@ namespace SharedLib.Extensions
         {
             TrackedProduct foundTracker;
 
-            Log.Debug("Removing tracker on {Interval} queue: {Tracker}", tracker.AlertInterval, tracker.FriendlyName);
+            Log.Debug("Removing tracker on {Interval} queue: {Tracker}", tracker.CheckInterval, tracker.FriendlyName);
             foundTracker = Constants.SavedData.TrackedProducts.Find(x => x.TrackerID == tracker.TrackerID);
             if (foundTracker != null)
             {
-                Log.Debug("Removed tracker on {Interval} queue: {Tracker}", tracker.AlertInterval, tracker.FriendlyName);
+                Log.Debug("Removed tracker on {Interval} queue: {Tracker}", tracker.CheckInterval, tracker.FriendlyName);
                 Constants.SavedData.TrackedProducts.Remove(foundTracker);
             }
             else
             {
-                Log.Warning("Attempted to remove tracker on {Interval} queue: {Tracker} | Couldn't find the tracker", tracker.AlertInterval, tracker.FriendlyName);
+                Log.Warning("Attempted to remove tracker on {Interval} queue: {Tracker} | Couldn't find the tracker", tracker.CheckInterval, tracker.FriendlyName);
             }
         }
     }

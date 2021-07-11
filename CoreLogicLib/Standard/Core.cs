@@ -16,11 +16,8 @@ namespace CoreLogicLib.Standard
         {
             HouseKeeping.ValidateLoggingReqs();
 
-            var testString = $"{Constants.PathLogs}\\WobigTools_.log";
-            var logUri = $"{Constants.LogUri}";
-
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.Async(c => c.File($"{Constants.PathLogs}\\WobigTools_.log", rollingInterval: RollingInterval.Day,
+                .WriteTo.Async(c => c.File($"{Constants.PathLogs}\\{OSDynamic.GetProductAssembly().ProductName}_.log", rollingInterval: RollingInterval.Day,
                   fileSizeLimitBytes: 10000000,
                   rollOnFileSizeLimit: true,
                   outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
@@ -32,7 +29,7 @@ namespace CoreLogicLib.Standard
                 .Enrich.FromLogContext()
                 .Enrich.WithMachineName()
                 .Enrich.WithEnvironmentUserName()
-                .Enrich.WithProperty("Application", "WobigTools")
+                .Enrich.WithProperty("Application", OSDynamic.GetProductAssembly().ProductName)
                 .Enrich.WithProperty("SessionID", Guid.NewGuid())
                 .Enrich.WithProperty("AppVersion", "0.1.0.0")
                 .CreateLogger();

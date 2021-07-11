@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using CoreLogicLib.Comm;
 using Serilog;
 using SharedLib.Dto;
+using SharedLib.Extensions;
 using SharedLib.General;
 
 namespace CoreLogicLib.Auto
@@ -12,7 +13,7 @@ namespace CoreLogicLib.Auto
         public static void CheckOnTrackers(TrackInterval interval)
         {
             Log.Debug("Running Tracker Check: {Interval}", interval);
-            foreach (TrackedProduct tracker in Constants.SavedData.TrackedProducts.FindAll(x => x.AlertInterval == interval))
+            foreach (TrackedProduct tracker in Constants.SavedData.TrackedProducts.FindAll(x => x.CheckInterval == interval))
             {
                 if (tracker.Enabled)
                 {
@@ -24,7 +25,6 @@ namespace CoreLogicLib.Auto
                 {
                     Log.Verbose("Tracker {Tracker} is disabled, skipping it", tracker.FriendlyName);
                 }
-                Log.Information("Ran {Interval} Process: {Tracker}", interval, tracker.FriendlyName);
             }
         }
 
@@ -54,6 +54,7 @@ namespace CoreLogicLib.Auto
                         {
                             Log.Verbose("Alerting on tracker as logic matches", tracker, attempt1.KeywordExists);
                             ProcessAlertToSend(tracker);
+                            Constants.WatcherEvents.AddMessage($"Alert Triggered: {tracker.FriendlyName} | Keyword: {tracker.Keyword}");
                         }
                     }
                     else
@@ -62,12 +63,19 @@ namespace CoreLogicLib.Auto
                         {
                             Log.Verbose("Resetting on tracker as logic matches", tracker, attempt1.KeywordExists);
                             ProcessAlertToReset(tracker);
+                            Constants.WatcherEvents.AddMessage($"Alert Reset: {tracker.FriendlyName} | Keyword: {tracker.Keyword}");
+                        }
+                        else
+                        {
+                            Constants.WatcherEvents.AddMessage($"Alert Checked: {tracker.FriendlyName} | Keyword: {tracker.Keyword}");
                         }
                     }
                 }
                 else
                 {
                     Log.Verbose("Keyword found [{KWFound}] and Validation [{KWValidation}] don't match, not alerting", attempt1.KeywordExists, attempt2.KeywordExists);
+                    Log.Information("Checked watcher for {TrackerName}, Keyword: {TrackerKeyword} | Alert not triggered", tracker.FriendlyName, tracker.Keyword);
+                    Constants.WatcherEvents.AddMessage($"Alert Checked: {tracker.FriendlyName} | Keyword: {tracker.Keyword}");
                 }
             }
             catch (Exception ex)
