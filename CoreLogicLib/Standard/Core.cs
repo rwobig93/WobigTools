@@ -32,10 +32,13 @@ namespace CoreLogicLib.Standard
                 .Enrich.FromLogContext()
                 .Enrich.WithMachineName()
                 .Enrich.WithEnvironmentUserName()
-                .Enrich.WithProperty("Application", OSDynamic.GetProductAssembly().ProductName)
+                .Enrich.WithProperty("Application", "WobigTools")
                 .Enrich.WithProperty("SessionID", Guid.NewGuid())
-                .Enrich.WithProperty("AppVersion", OSDynamic.GetProductAssembly().AppVersion)
+                .Enrich.WithProperty("AppVersion", "0.1.0.0")
                 .CreateLogger();
+
+            ChangeLoggingLevelCloud();
+            ChangeLoggingLevelLocal();
 
             Log.Information("==START-STOP== Application Started");
 
@@ -142,6 +145,15 @@ namespace CoreLogicLib.Standard
             HouseKeeping.ValidateRunningMode();
             HouseKeeping.ValidateAllFilePaths(true);
             HouseKeeping.ValidateLoggingReqs();
+        }
+
+        public static void CatchAppClose()
+        {
+            SaveEverything();
+            Jobs.StopJobService();
+            Comm.Web.Dispose();
+            Log.Information("==START-STOP== Application Stopped");
+            Log.CloseAndFlush();
         }
 
         public static StatusReturn LoadAllFiles()

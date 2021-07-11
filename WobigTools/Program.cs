@@ -17,8 +17,10 @@ namespace WobigTools
             }
             Core.ProcessSettingsFromConfig();
             Core.StartServices();
-
+            
             CreateHostBuilder(args).Build().Run();
+
+            Core.CatchAppClose();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

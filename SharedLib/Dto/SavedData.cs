@@ -12,8 +12,7 @@ namespace SharedLib.Dto
 {
     public class SavedData
     {
-        public List<TrackedProduct> TrackedProducts1Min { get; set; } = new List<TrackedProduct>();
-        public List<TrackedProduct> TrackedProducts5Min { get; set; } = new List<TrackedProduct>();
+        public List<TrackedProduct> TrackedProducts { get; set; } = new List<TrackedProduct>();
 
         public static StatusReturn Load()
         {

@@ -1,6 +1,7 @@
 ﻿using System;
 using CoreLogicLib.Standard;
 using Hangfire;
+using Hangfire.MemoryStorage;
 using Hangfire.MySql;
 using Microsoft.Extensions.Configuration;
 using Serilog;
@@ -11,7 +12,6 @@ namespace CoreLogicLib.Auto
 {
     public static class Jobs
     {
-        public static IConfiguration _config;
         public static BackgroundJobServer BackgroundJobServer { set; get; }
         public static StatusReturn InitializeJobService()
         {
@@ -23,7 +23,8 @@ namespace CoreLogicLib.Auto
                 }
                 else
                 {
-                    GlobalConfiguration.Configuration.UseStorage(new MySqlStorage(_config.GetConnectionString("default"), new MySqlStorageOptions() { }));
+                    //GlobalConfiguration.Configuration.UseStorage(new MySqlStorage(_config.GetConnectionString("default"), new MySqlStorageOptions() { }));
+                    GlobalConfiguration.Configuration.UseMemoryStorage();
                     BackgroundJobServer = new BackgroundJobServer();
                 }
                 return StatusReturn.Success;

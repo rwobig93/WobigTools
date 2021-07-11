@@ -12,13 +12,7 @@ namespace CoreLogicLib.Auto
         public static void CheckOnTrackers(TrackInterval interval)
         {
             Log.Debug("Running Tracker Check: {Interval}", interval);
-            List<TrackedProduct> selectedList = interval switch
-            {
-                TrackInterval.OneMin => Constants.SavedData.TrackedProducts1Min,
-                TrackInterval.FiveMin => Constants.SavedData.TrackedProducts5Min,
-                _ => Constants.SavedData.TrackedProducts5Min,
-            };
-            foreach (TrackedProduct tracker in selectedList)
+            foreach (TrackedProduct tracker in Constants.SavedData.TrackedProducts.FindAll(x => x.AlertInterval == interval))
             {
                 if (tracker.Enabled)
                 {
@@ -30,6 +24,7 @@ namespace CoreLogicLib.Auto
                 {
                     Log.Verbose("Tracker {Tracker} is disabled, skipping it", tracker.FriendlyName);
                 }
+                Log.Information("Ran {Interval} Process: {Tracker}", interval, tracker.FriendlyName);
             }
         }
 
