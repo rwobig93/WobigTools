@@ -1,9 +1,13 @@
 ﻿@page "/"
 @using SharedLib.General
+@using MatBlazor
+
+@inject IMatToaster Toaster
 
 <h1>Get back to work Rick!</h1>
 
-<button class="btn btn-primary" @onclick="AddLog">Test Button</button>
+<button class="btn btn-primary" @onclick="AddLog">Add Log</button>
+<button class="btn btn-secondary" @onclick="ToastBarage">Toast Barage!</button>
 
 <h2> Log Output: </h2>
 <div class="textarea">
@@ -31,5 +35,14 @@
         {
             StateHasChanged();
         });
+    }
+
+    private async void ToastBarage()
+    {
+        Toaster.CustomToast("Test Toast Yo!", "Test Toast Danger", MatToastType.Danger);
+        Toaster.CustomToast("Test Toast Yo!", "Test Toast Info", MatToastType.Info);
+        Toaster.CustomToast("Test Toast Yo!", "Test Toast Primary", MatToastType.Primary);
+        Toaster.CustomToast("Test Toast Yo!", "Test Toast Success", MatToastType.Success);
+        Toaster.CustomToast("Test Toast Yo!", "Test Toast Warning", MatToastType.Warning);
     }
 }

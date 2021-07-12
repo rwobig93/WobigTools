@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using CoreLogicLib.Standard;
 using SharedLib.Dto;
+using WobigTools.Shared;
 
 namespace WobigTools
 {

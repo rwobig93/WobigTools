@@ -3,6 +3,10 @@
 @using WobigTools.Models
 @using SharedLib.Dto
 @using SharedLib.General
+@using MatBlazor
+@using Serilog 
+
+@inject IMatToaster Toaster
 
 <h4>Add New Watcher</h4>
 <EditForm Model="@newProduct" OnValidSubmit="@AddWatcher">
@@ -54,7 +58,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-
+        
     }
 
     private async Task AddWatcher()
@@ -71,7 +75,9 @@
         x.PageURL == p.PageURL &&
         x.Keyword == p.Keyword) != null)
         {
-            Constants.DebugLog.AddMessage($"Dupe watcher: '{p.Keyword}' on {p.PageURL}, update the existing watcher or enter a new one");
+            var title = "Watcher Already Exists";
+            var message = $"'{p.Keyword}' on {p.PageURL} Exists Already";
+            Toaster.CustomToast(message, title, MatToastType.Danger, 8000);
         }
         else
         {

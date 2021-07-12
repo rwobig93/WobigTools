@@ -149,6 +149,18 @@ input {
         outline: none;
     }
 
+.mdc-text-field,
+.mdc-text-field--filled
+.mdc-text-field--filled:not(.mdc-text-field--disabled),
+.mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input,
+.mat-text-field mdc-text-field modified invalid mdc-text-field--filled mdc-text-field--invalid,
+.mat-text-wobigtech,
+mat-theme-wobigtech,
+.mat-theme-wobigtech {
+    color: #BB86FC !important;
+    background-color: #121212 !important;
+}
+
 .table {
     color: #898989;
     border-color: #76B900;

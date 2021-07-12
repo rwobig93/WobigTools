@@ -10,6 +10,7 @@ using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
 using WobigTools.Data;
+using MatBlazor;
 
 namespace WobigTools
 {
@@ -28,10 +29,20 @@ namespace WobigTools
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddHostedService<LifetimeEventsHostedService>();
             services.AddSingleton<WeatherForecastService>();
             services.AddTransient<ISqlDA, MySqlDA>();
             services.AddTransient<IPeopleData, PeopleData>();
-            services.AddHostedService<LifetimeEventsHostedService>();
+            services.AddMatBlazor();
+            services.AddMatToaster(config =>
+            {
+                config.Position = MatToastPosition.TopRight;
+                config.PreventDuplicates = true;
+                config.NewestOnTop = true;
+                config.ShowCloseButton = true;
+                config.MaximumOpacity = 95;
+                config.VisibleStateDuration = 5000;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using MatBlazor;
 using Serilog;
 using SharedLib.Dto;
 using SharedLib.General;
@@ -43,6 +44,25 @@ namespace SharedLib.Extensions
             {
                 Log.Warning("Attempted to remove tracker on {Interval} queue: {Tracker} | Couldn't find the tracker", tracker.CheckInterval, tracker.FriendlyName);
             }
+        }
+
+        public static void CustomToast(this IMatToaster toaster, string message, string title, MatToastType toastType, int duration = 5000, string icon = "")
+        {
+            if (icon != "")
+            {
+                toaster.Add(message, toastType, title, configure: config =>
+                {
+                    config.VisibleStateDuration = duration;
+                });
+            }
+            else
+            {
+                toaster.Add(message, toastType, title, icon: icon, configure: config =>
+                {
+                    config.VisibleStateDuration = duration;
+                });
+            }
+            Log.Information("Toast {ToastType}: {ToastTitle} - {ToastMessage}", toastType, title, message);
         }
     }
 }
