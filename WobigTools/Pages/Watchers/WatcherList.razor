@@ -4,26 +4,64 @@
 @using SharedLib.Dto
 @using SharedLib.General
 @using MatBlazor
-@using Serilog 
 
 @inject IMatToaster Toaster
 
-<h4>Add New Watcher</h4>
-<EditForm Model="@newProduct" OnValidSubmit="@AddWatcher">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+<h4 style="text-align: center">Options</h4>
+<div class="row">
+    <div class="col text-center">
+        <button Class="btn btn-primary" @onclick="@OpenAddAlertDestination">Add Alert Destination</button>
+        <button Class="btn btn-primary" @onclick="@OpenAddWatcher">Add Watcher</button>
+    </div>
+</div>
+<br />
 
-    <table class="table">
-        <tbody>
-            <tr><td width="15%">Friendly Name:</td><td width="85%"><InputText style="width: 100%;" id="friendlyname" @bind-Value="newProduct.FriendlyName" /></td></tr>
-            <tr><td width="15%">Page URL:</td><td width="85%"><InputText style="width: 100%;" id="pageurl" @bind-Value="newProduct.PageURL" /></td></tr>
-            <tr><td width="15%">Keyword:</td><td width="85%"><InputText style="width: 100%;" id="keyword" @bind-Value="newProduct.Keyword" /></td></tr>
-        </tbody>
-    </table>
-    <button type="submit" class="btn btn-primary">Submit</button>
-</EditForm>
+<MatDialog @bind-IsOpen="@menuOpenWatcher">
+    <EditForm Model="@newProduct" OnValidSubmit="@AddWatcher">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <table class="table">
+            <tbody>
+                <tr><td width="17%">Friendly Name:</td><td width="85%"><InputText style="width: 90%;" id="friendlyname" @bind-Value="newProduct.FriendlyName" /></td></tr>
+                <tr><td width="17%">Page URL:</td><td width="85%"><InputText style="width: 90%;" id="pageurl" @bind-Value="newProduct.PageURL" /></td></tr>
+                <tr><td width="17%">Keyword:</td><td width="85%"><InputText style="width: 90%;" id="keyword" @bind-Value="newProduct.Keyword" /></td></tr>
+                <tr>
+                    <td width="17%">Alert Destination:</td>
+                    <td width="85%">
+                        <select style="width: 90%;" class="form-control selectpicker" @bind="newProduct.AlertDestinationID">
+                            @foreach (var alertDest in Constants.SavedData.Alerts)
+                            {
+                                <option value="@alertDest.AlertID">@alertDest.AlertName</option>
+                            } 
+                        </select>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="row">
+            <div class="col text-center">
+                <button class="btn btn-warning" @onclick="(() => menuOpenWatcher = false)">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Watcher</button>
+            </div>
+        </div>
+        <br />
+    </EditForm>
+</MatDialog>
 
-<h3>Watchers List</h3>
+<MatDialog @bind-IsOpen="@menuOpenAlerts">
+    <EditForm Model="@newProduct"> 
+    @* TODO: Add display model for alert destination and editform *@
+        <div class="row">
+            <div class="col text-center">
+                <button class="btn btn-warning" @onclick="(() => menuOpenAlerts = false)">Cancel</button>
+                <button type="submit" class="btn btn-primary" disabled>Create Alert Dest</button>
+            </div>
+        </div>
+        <br />
+    </EditForm>
+</MatDialog>
+
+<h3 style="text-align: center">Watchers List</h3>
 <table class="table table-striped">
     <thead>
         <tr>
@@ -55,10 +93,22 @@
 
 @code {
     private DisplayTrackedProductModel newProduct = new DisplayTrackedProductModel();
+    private bool menuOpenAlerts = false;
+    private bool menuOpenWatcher = false;
 
     protected override async Task OnInitializedAsync()
     {
-        
+
+    }
+
+    private async Task OpenAddAlertDestination()
+    {
+        menuOpenAlerts = true;
+    }
+
+    private async Task OpenAddWatcher()
+    {
+        menuOpenWatcher = true;
     }
 
     private async Task AddWatcher()
@@ -83,8 +133,10 @@
         {
             Constants.SavedData.TrackedProducts.Add(p);
             SavedData.Save();
+            Toaster.CustomToast($"Watcher {p.FriendlyName} created!", "Success", MatToastType.Success);
 
             newProduct = new DisplayTrackedProductModel();
+            menuOpenWatcher = false;
         }
     }
 

@@ -12,7 +12,7 @@ namespace CoreLogicLib.Comm
 {
     public static class Communication
     {
-        internal static void SendAlertEmail(TrackedProduct tracker, string title = null, string msg = null)
+        public static void SendAlertEmail(TrackedProduct tracker, string title = null, string msg = null)
         {
             try
             {
@@ -31,7 +31,7 @@ namespace CoreLogicLib.Comm
             }
         }
 
-        internal static void SendAlertWebhookDiscord(TrackedProduct tracker, string _title = null, string _msg = null, string _color = "718317")
+        public static void SendAlertWebhookDiscord(TrackedProduct tracker, string _title = null, string _msg = null, string _color = "718317")
         {
             try
             {
@@ -98,6 +98,37 @@ namespace CoreLogicLib.Comm
             smtpClient.Authenticate(Constants.Config.SMTPUsername, Constants.Config.SMTPPassword);
             smtpClient.Send(mailMessage);
             smtpClient.Disconnect(true);
+        }
+
+        public static bool SendEmail(string title, string msg, string[] emails)
+        {
+            try
+            {
+                var mailMessage = new MimeMessage();
+                mailMessage.From.Add(new MailboxAddress(Constants.Config.SMTPEmailName, Constants.Config.SMTPEmailFrom));
+                foreach (var address in emails)
+                {
+                    mailMessage.Bcc.Add(new MailboxAddress(address.ToString()));
+                }
+
+                mailMessage.Subject = title;
+                mailMessage.Body = new TextPart("plain")
+                {
+                    Text = msg
+                };
+
+                using var smtpClient = new SmtpClient();
+                smtpClient.Connect(Constants.Config.SMTPUrl, Constants.Config.SMTPPort, MailKit.Security.SecureSocketOptions.Auto);
+                smtpClient.Authenticate(Constants.Config.SMTPUsername, Constants.Config.SMTPPassword);
+                smtpClient.Send(mailMessage);
+                smtpClient.Disconnect(true);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failure occured attempting to send email");
+                return false;
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿@page "/Administration/Settings"
+@using System.ComponentModel.DataAnnotations;
 
 @inject IMatToaster Toaster
 
@@ -42,9 +43,27 @@
     <button type="submit" class="btn btn-primary">Submit</button>
 </EditForm>
 
+<br />
+<h4>Test SMTP</h4>
+<table class="table">
+    <tbody>
+        <tr>
+            <td width="15%" align="center" valign="middle">Send To Address:</td>
+            <td width="80%">
+                <MatTextField Label="Send To Address" Style="width: 50%" PlaceHolder="Send To Address" Id="sendToAddress" @bind-Value="smtpTestAddress" TValue="string"></MatTextField>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<button type="button" style="align-content: center" class="btn btn-secondary" @onclick="TestSMTP">Test SMTP</button>
+
 
 @code {
     private DisplaySettingsSMTPModel settingsSMTP = new DisplaySettingsSMTPModel();
+
+    [Required]
+    [EmailAddress(ErrorMessage = "Please enter a valid email address")]
+    public string smtpTestAddress = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -71,5 +90,21 @@
         Constants.Config.SMTPPort = settingsSMTP.Port;
         Config.Save();
         Toaster.CustomToast("SMTP Settings Saved Successfully", "Success", MatToastType.Success);
+    }
+
+    private async Task TestSMTP()
+    {
+        if (smtpTestAddress.IsValidEmail())
+        {
+            var sendSuccess = CoreLogicLib.Comm.Communication.SendEmail("Test Email", "This is a test email, if your received it then your SMTP settings are valid and working!", new string[] { smtpTestAddress });
+            if (sendSuccess)
+                Toaster.CustomToast("Email send was successful!", "Success", MatToastType.Success);
+            else
+                Toaster.CustomToast("SMTP Settings Invalid", "Failure", MatToastType.Danger);
+        }
+        else
+        {
+            Toaster.CustomToast("Invalid Email Address", "Warning", MatToastType.Warning);
+        }
     }
 }

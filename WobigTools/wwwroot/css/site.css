@@ -131,16 +131,16 @@ input {
     box-shadow: none;
 }
 
-    input.focus, input:focus {
+    input:focus,
+    input:focus-visible {
         color: #BB86FC;
-        background-color: #121212;
+        background-color: #040404;
         border-color: #BB86FC;
         box-shadow: none;
     }
 
-    input:focus-visible, input.focus-visible,
     input:valid, input.valid,
-    input:not(:disabled):not(.disabled).active, 
+    input:not(:disabled):not(.disabled).active,
     input:not(:disabled):not(.disabled):active {
         color: #BB86FC;
         background-color: #121212;
@@ -150,7 +150,7 @@ input {
     }
 
 .mdc-text-field,
-.mdc-text-field--filled
+.mdc-text-field--filled,
 .mdc-text-field--filled:not(.mdc-text-field--disabled),
 .mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input,
 .mat-text-field mdc-text-field modified invalid mdc-text-field--filled mdc-text-field--invalid,
@@ -158,6 +158,10 @@ input {
 mat-theme-wobigtech,
 .mat-theme-wobigtech {
     color: #BB86FC !important;
+    background-color: #121212 !important;
+}
+
+.mdc-dialog__surface {
     background-color: #121212 !important;
 }
 
@@ -206,6 +210,28 @@ mat-theme-wobigtech,
     border-color: #76B900;
 }
 
+.form-control {
+    display: block;
+    width: 100%;
+    height: calc(1.5em + .75rem + 2px);
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #898989;
+    background-color: #121212;
+    background-clip: padding-box;
+    border: 1px solid #BB86FC;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+    .form-control:focus,
+    .form-control:focus-visible {
+        color: #BB86FC;
+        background-color: #040404;
+    }
+
 .content {
     padding-top: 1.1rem;
 }
@@ -235,6 +261,10 @@ mat-theme-wobigtech,
 .display-message {
     color: #BB86FC;
     border: 0.5px hidden #BB86FC;
+}
+
+.horizontal-center {
+    text-align: center !important;
 }
 
 #blazor-error-ui {

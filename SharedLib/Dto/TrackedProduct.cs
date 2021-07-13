@@ -13,6 +13,7 @@ namespace SharedLib.Dto
         public bool AlertOnKeywordNotExist { get; set; } = true;
         public bool Enabled { get; set; } = true;
         public TrackInterval CheckInterval { get; set; }
+        public Alert AlertDestination { get; set; }
         public AlertType AlertType { get; set; }
         public List<string> Emails { get; set; }
         public string WebHookURL { get; set; }

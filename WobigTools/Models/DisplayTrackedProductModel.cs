@@ -1,4 +1,5 @@
 ﻿using SharedLib.Dto;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -19,6 +20,7 @@ namespace WobigTools.Models
         public string Keyword { get; set; }
         public bool AlertOnKeywordNotExist { get; set; } = true;
         public bool Enabled { get; set; } = true;
+        public Guid AlertDestinationID { get; set; }
         public TrackInterval AlertInterval { get; set; }
         public AlertType AlertType { get; set; }
         public List<string> Emails { get; set; }
