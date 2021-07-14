@@ -22,25 +22,51 @@
         <ValidationSummary />
         <table class="table">
             <tbody>
-                <tr><td width="17%">Friendly Name:</td><td width="85%"><InputText style="width: 90%;" id="friendlyname" @bind-Value="newProduct.FriendlyName" /></td></tr>
-                <tr><td width="17%">Page URL:</td><td width="85%"><InputText style="width: 90%;" id="pageurl" @bind-Value="newProduct.PageURL" /></td></tr>
-                <tr><td width="17%">Keyword:</td><td width="85%"><InputText style="width: 90%;" id="keyword" @bind-Value="newProduct.Keyword" /></td></tr>
+                <tr>
+                    <td width="17%">Friendly Name:</td>
+                    <td width="85%">
+                        <InputText style="width: 90%;" @bind-Value="newProduct.FriendlyName" />
+                    </td>
+                </tr>
+                <tr>
+                    <td width="17%">Page URL:</td>
+                    <td width="85%">
+                        <InputText style="width: 90%;" @bind-Value="newProduct.PageURL" />
+                    </td>
+                </tr>
+                <tr>
+                    <td width="17%">Keyword:</td>
+                    <td width="85%">
+                        <InputText style="width: 90%;" @bind-Value="newProduct.Keyword" />
+                    </td>
+                </tr>
+                <tr>
+                    <td width="17%">Alert When:</td>
+                    <td width="85%">
+                       <div>
+                           <MatRadioGroup @bind-Value="@newProduct.AlertOnKeywordNotExist" TValue="bool">
+                               <MatRadioButton Value="@true" TValue="bool">Keyword Doesn't Exist</MatRadioButton>
+                               <MatRadioButton Value="@false" TValue="bool">Keyword Exists</MatRadioButton>
+                           </MatRadioGroup>
+                       </div>
+                    </td>
+                </tr>
                 <tr>
                     <td width="17%">Alert Destination:</td>
                     <td width="85%">
-                        <select style="width: 90%;" class="form-control selectpicker" @bind="newProduct.AlertDestinationID">
+                        <MatSelect Label="Alert Destination" @bind-Value="@newProduct.AlertDestinationID">
                             @foreach (var alertDest in Constants.SavedData.Alerts)
                             {
-                                <option value="@alertDest.AlertID">@alertDest.AlertName</option>
-                            } 
-                        </select>
+                                <MatOption Value="@alertDest.AlertID">@alertDest.AlertName (@alertDest.AlertType.ToString())</MatOption>
+                            }
+                        </MatSelect>
                     </td>
                 </tr>
             </tbody>
         </table>
         <div class="row">
             <div class="col text-center">
-                <button class="btn btn-warning" @onclick="(() => menuOpenWatcher = false)">Cancel</button>
+                <button class="btn btn-warning" @onclick="CloseAddWatcher">Cancel</button>
                 <button type="submit" class="btn btn-primary">Create Watcher</button>
             </div>
         </div>
@@ -49,12 +75,84 @@
 </MatDialog>
 
 <MatDialog @bind-IsOpen="@menuOpenAlerts">
-    <EditForm Model="@newProduct"> 
-    @* TODO: Add display model for alert destination and editform *@
+    <EditForm Model="@newAlert" OnValidSubmit="@AddAlertDestination">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <table class="table">
+            <tbody>
+                <tr>
+                    <td width="25%">Alert Name:</td>
+                    <td width="70%">
+                        <InputText style="width: 90%;" @bind-Value="newAlert.AlertName" />
+                    </td>
+                </tr>
+                <tr>
+                    <td width="20%">Alert Type:</td>
+                    <td width="80%">
+                        <select style="width: 90%;" class="form-control selectpicker" @bind="newAlert.AlertType">
+                            <option value=0>Email</option>
+                            <option value=1>Discord</option>
+                            <option value=2>Email And Discord</option>
+                        </select>
+                    </td>
+                </tr>
+                @if (newAlert.AlertType == 0)
+                {
+                    <tr>
+                        <td width="25%">Email(s):</td>
+                        <td width="70%">
+                            <InputText style="width: 90%;" @bind-Value="newAlert.Emails" /><br />
+                        </td>
+                    </tr>
+                }
+                @if (newAlert.AlertType == 1)
+                {
+                    <tr>
+                        <td width="25%">Discord Webhook URL:</td>
+                        <td width="70%">
+                            <InputText style="width: 90%;" @bind-Value="newAlert.WebHookURL" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="25%">Discord Mention ID:</td>
+                        <td width="70%">
+                            <InputText style="width: 90%;" @bind-Value="newAlert.MentionString" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <MatButtonLink Target="_blank" Href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-">How to find a Discord ID</MatButtonLink>
+                    </tr>
+                }
+                @if (newAlert.AlertType == 2)
+                {
+                    <tr>
+                        <td width="25%">Email(s):</td>
+                        <td width="70%">
+                            <InputText style="width: 90%;" @bind-Value="newAlert.Emails" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="25%">Discord Webhook URL:</td>
+                        <td width="70%">
+                            <InputText style="width: 90%;" @bind-Value="newAlert.WebHookURL" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="25%">Discord Mention ID:</td>
+                        <td width="70%">
+                            <InputText style="width: 90%;" @bind-Value="newAlert.MentionString" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <MatButtonLink Target="_blank" Href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-">How to find a Discord ID</MatButtonLink>
+                    </tr>
+                }
+            </tbody>
+        </table>
         <div class="row">
             <div class="col text-center">
-                <button class="btn btn-warning" @onclick="(() => menuOpenAlerts = false)">Cancel</button>
-                <button type="submit" class="btn btn-primary" disabled>Create Alert Dest</button>
+                <button class="btn btn-warning" @onclick="CloseAddAlertDestination">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Alert</button>
             </div>
         </div>
         <br />
@@ -83,7 +181,10 @@
                 <td>@product.CheckInterval</td>
                 <td>@product.PageURL</td>
                 <td>
-                    <button disabled class="btn btn-secondary" @onclick="(() => EditWatcher(product))">Edit</button>
+                    <button class="btn btn-secondary" @onclick="(() => ToggleWatcher(product))">
+                        @if (product.Enabled) { <div>Disable</div> }
+                        else { <div>Enable</div> }
+                    </button>
                     <button class="btn btn-warning" @onclick="(() => DeleteWatcher(product))">Delete</button>
                 </td>
             </tr>
@@ -93,6 +194,7 @@
 
 @code {
     private DisplayTrackedProductModel newProduct = new DisplayTrackedProductModel();
+    private DisplayAlertModel newAlert = new DisplayAlertModel();
     private bool menuOpenAlerts = false;
     private bool menuOpenWatcher = false;
 
@@ -106,28 +208,90 @@
         menuOpenAlerts = true;
     }
 
+    private async Task CloseAddAlertDestination()
+    {
+        menuOpenAlerts = false;
+        newAlert = new DisplayAlertModel();
+    }
+
     private async Task OpenAddWatcher()
     {
         menuOpenWatcher = true;
     }
 
+    private async Task CloseAddWatcher()
+    {
+        menuOpenWatcher = false;
+        newProduct = new DisplayTrackedProductModel();
+    }
+
+    private async Task AddAlertDestination()
+    {
+        Alert a = new Alert()
+        {
+            AlertName = newAlert.AlertName,
+            AlertType = (AlertType)newAlert.AlertType,
+            Emails = newAlert.Emails.Split(';').ToList(),
+            WebHookURL = newAlert.WebHookURL,
+            MentionString = newAlert.MentionString
+        };
+
+        if (newAlert.AlertType == -1)
+        {
+            Toaster.CustomToast("You didn't pick an alert type!", "Warning", MatToastType.Warning);
+        }
+        else if (Constants.SavedData.Alerts.Find(x =>
+        x.AlertType == AlertType.Email &&
+        x.Emails == a.Emails) != null)
+        {
+            Toaster.CustomToast("Alert for these emails already exists", "Warning", MatToastType.Warning);
+        }
+        else if (Constants.SavedData.Alerts.Find(x =>
+        x.AlertType == AlertType.Webhook &&
+        x.WebHookURL == a.WebHookURL) != null)
+        {
+            Toaster.CustomToast("Alert for Webhook already exists", "Warning", MatToastType.Warning);
+        }
+        else if (Constants.SavedData.Alerts.Find(x =>
+        x.AlertType == AlertType.Email_Webhook &&
+        x.WebHookURL == a.WebHookURL &&
+        x.Emails == a.Emails) != null)
+        {
+            Toaster.CustomToast("Alert for this Webhook & Emails exists", "Warning", MatToastType.Warning);
+        }
+        else
+        {
+            Constants.SavedData.Alerts.Add(a);
+            SavedData.Save();
+            Toaster.CustomToast($"Alert {a.AlertName} created!", "Success", MatToastType.Success);
+            Log.Information("Alert destination created: {AlertID} | {AlertName} | {AlertType}", a.AlertID, a.AlertName, a.AlertType);
+
+            newAlert = new DisplayAlertModel();
+            menuOpenAlerts = false;
+        }
+    }
+
     private async Task AddWatcher()
     {
+        if (Constants.SavedData.Alerts.Find(x => x.AlertID == newProduct.AlertDestinationID) == null)
+        {
+            Toaster.CustomToast("Please choose an Alert Destination", "Alert Destination Invalid", MatToastType.Warning);
+            return;
+        }
         TrackedProduct p = new TrackedProduct()
         {
             FriendlyName = newProduct.FriendlyName,
             PageURL = newProduct.PageURL,
             Keyword = newProduct.Keyword,
             AlertOnKeywordNotExist = true,
-            Enabled = true
+            Enabled = true,
+            AlertDestination = Constants.SavedData.Alerts.Find(x => x.AlertID == newProduct.AlertDestinationID)
         };
         if (Constants.SavedData.TrackedProducts.Find(x =>
         x.PageURL == p.PageURL &&
         x.Keyword == p.Keyword) != null)
         {
-            var title = "Watcher Already Exists";
-            var message = $"'{p.Keyword}' on {p.PageURL} Exists Already";
-            Toaster.CustomToast(message, title, MatToastType.Danger, 8000);
+            Toaster.CustomToast($"'{p.Keyword}' on {p.PageURL} Exists Already", "Watcher Already Exists", MatToastType.Danger, 8000);
         }
         else
         {
@@ -140,13 +304,19 @@
         }
     }
 
-    private async Task EditWatcher(TrackedProduct product)
+    private async Task ToggleWatcher(TrackedProduct product)
     {
-
+        product.Enabled = !product.Enabled;
+        Log.Information("Tracker toggled: {TrackerID} | {TrackerFriendlyName} | State: {TrackerState}", product.TrackerID, product.FriendlyName, product.Enabled);
+        SavedData.Save();
+        StateHasChanged();
     }
 
     private async Task DeleteWatcher(TrackedProduct product)
     {
-        Constants.DebugLog.AddMessage($"We're trying to delete tracked watcher: {product.FriendlyName}");
+        Log.Information("Deleting tracker: {TrackerID} | {TrackerFriendlyName} | {TrackerKeyword} | {TrackerURL}", product.TrackerID, product.FriendlyName, product.Keyword, product.PageURL);
+        Constants.SavedData.TrackedProducts.Remove(product);
+        SavedData.Save();
+        StateHasChanged();
     }
 }

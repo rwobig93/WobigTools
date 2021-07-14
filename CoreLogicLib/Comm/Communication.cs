@@ -16,14 +16,14 @@ namespace CoreLogicLib.Comm
         {
             try
             {
-                Log.Debug("Attempting to send email alert: [{Tracker}] {Emails}", tracker.FriendlyName, tracker.Emails);
+                Log.Debug("Attempting to send email alert: [{Tracker}] {Emails}", tracker.FriendlyName, tracker.AlertDestination.Emails);
                 if (title == null)
                     title = $"Keyword alert {tracker.FriendlyName}, Go Go Go!";
                 if (msg == null)
                     msg = $"Alerting on the tracker for the following page:{Environment.NewLine}{tracker.PageURL}";
 
                 Communication.SendEmail(tracker, title, msg);
-                Log.Information("Sent email alert: [{Tracker}] {Emails}", tracker.FriendlyName, tracker.Emails);
+                Log.Information("Sent email alert: [{Tracker}] {Emails}", tracker.FriendlyName, tracker.AlertDestination.Emails);
             }
             catch (Exception ex)
             {
@@ -56,11 +56,11 @@ namespace CoreLogicLib.Comm
                             color = _color
                         }
                     },
-                    content = $"<@&{tracker.MentionString}>"
+                    content = $"<@&{tracker.AlertDestination.MentionString}>"
                 });
 
                 Log.Debug("Attempting to send webhook", tracker, jsonSend);
-                WebRequest request = (HttpWebRequest)WebRequest.Create(tracker.WebHookURL);
+                WebRequest request = (HttpWebRequest)WebRequest.Create(tracker.AlertDestination.WebHookURL);
                 request.ContentType = "application/json";
                 request.Method = "POST";
                 using (var sw = new StreamWriter(request.GetRequestStream()))
@@ -82,7 +82,7 @@ namespace CoreLogicLib.Comm
         {
             var mailMessage = new MimeMessage();
             mailMessage.From.Add(new MailboxAddress(Constants.Config.SMTPEmailName, Constants.Config.SMTPEmailFrom));
-            foreach (var address in tracker.Emails)
+            foreach (var address in tracker.AlertDestination.Emails)
             {
                 mailMessage.Bcc.Add(new MailboxAddress(address.ToString()));
             }

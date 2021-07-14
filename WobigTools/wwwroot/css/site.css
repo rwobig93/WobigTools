@@ -7,6 +7,7 @@
     --material-error: #CF6679;
     --wobigtech-accent: #76B900;
     --wobigtech-color: #898989;
+    --wobigtech-note: #5c5c5c;
     --wobigtech-background: #040404;
     --wobigtech-warning: #CC1212;
 */
@@ -33,7 +34,6 @@ a, .btn-link {
         border-color: #121212;
     }
 
-    .btn-primary.focus,
     .btn-primary:focus {
         color: #121212;
         background-color: #BB86FC;
@@ -42,16 +42,14 @@ a, .btn-link {
     }
 
     .btn-primary:not(:disabled):not(.disabled).active,
-    .btn-primary:not(:disabled):not(.disabled):active,
-    .show > .btn-primary.dropdown-toggle {
+    .btn-primary.dropdown-toggle {
         color: #BB86FC;
         background-color: #121212;
         border-color: #121212;
     }
 
         .btn-primary:not(:disabled):not(.disabled).active:focus,
-        .btn-primary:not(:disabled):not(.disabled):active:focus,
-        .show > .btn-primary.dropdown-toggle:focus {
+        .btn-primary.dropdown-toggle:focus {
             box-shadow: none;
         }
 
@@ -67,7 +65,6 @@ a, .btn-link {
         border-color: #121212;
     }
 
-    .btn-secondary.focus,
     .btn-secondary:focus {
         color: #121212;
         background-color: #03DAC6;
@@ -76,16 +73,14 @@ a, .btn-link {
     }
 
     .btn-secondary:not(:disabled):not(.disabled).active,
-    .btn-secondary:not(:disabled):not(.disabled):active,
-    .show > .btn-secondary.dropdown-toggle {
+    .btn-secondary.dropdown-toggle {
         color: #03DAC6;
         background-color: #121212;
         border-color: #121212;
     }
 
         .btn-secondary:not(:disabled):not(.disabled).active:focus,
-        .btn-secondary:not(:disabled):not(.disabled):active:focus,
-        .show > .btn-secondary.dropdown-toggle:focus {
+        .btn-secondary.dropdown-toggle:focus {
             box-shadow: none;
         }
 
@@ -101,7 +96,6 @@ a, .btn-link {
         border-color: #121212;
     }
 
-    .btn-warning.focus,
     .btn-warning:focus {
         color: #121212;
         background-color: #CC1212;
@@ -109,23 +103,23 @@ a, .btn-link {
         box-shadow: none;
     }
 
-    .btn-warning:not(:disabled):not(.disabled).active,
     .btn-warning:not(:disabled):not(.disabled):active,
-    .show > .btn-warning.dropdown-toggle {
+    .btn-warning.dropdown-toggle {
         color: #CC1212;
         background-color: #121212;
         border-color: #121212;
     }
 
         .btn-warning:not(:disabled):not(.disabled).active:focus,
-        .btn-warning:not(:disabled):not(.disabled):active:focus,
-        .show > .btn-warning.dropdown-toggle:focus {
+        .btn-warning.dropdown-toggle:focus {
             box-shadow: none;
         }
 
-input {
+input,
+.mdc-button_ripple {
     color: #BB86FC;
     background-color: #121212;
+    border: 1px solid;
     border-radius: 8px;
     border-color: #BB86FC;
     box-shadow: none;
@@ -139,8 +133,7 @@ input {
         box-shadow: none;
     }
 
-    input:valid, input.valid,
-    input:not(:disabled):not(.disabled).active,
+    input:valid,
     input:not(:disabled):not(.disabled):active {
         color: #BB86FC;
         background-color: #121212;
@@ -149,20 +142,52 @@ input {
         outline: none;
     }
 
+.noteworthy {
+    color: #5c5c5c;
+}
+
 .mdc-text-field,
-.mdc-text-field--filled,
 .mdc-text-field--filled:not(.mdc-text-field--disabled),
 .mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input,
 .mat-text-field mdc-text-field modified invalid mdc-text-field--filled mdc-text-field--invalid,
-.mat-text-wobigtech,
-mat-theme-wobigtech,
-.mat-theme-wobigtech {
+.mat-text-field-input mdc-text-field__input {
     color: #BB86FC !important;
     background-color: #121212 !important;
 }
 
-.mdc-dialog__surface {
+.mdc-select,
+.mdc-select:not(.mdc-select--disabled) .mdc-select__anchor,
+.mdc-menu-surface,
+.mdc-select__selected-text,
+.mdc-menu .mdc-list-item {
+    color: #BB86FC !important;
+    background-color: #0a0a0a !important;
+    border-color: #BB86FC !important;
+    border-radius: 8px;
+}
+
+.mdc-button.mdc-ripple-upgraded {
+    color: #76B900 !important;
+}
+
+.mdc-floating-label {
+    color: #BB86FC !important;
+}
+
+.mdc-dialog .mdc-dialog__surface {
     background-color: #121212 !important;
+    max-width: none !important;
+    width: 174% !important;
+}
+
+@media (max-width: 592px) {
+    .mdc-dialog .mdc-dialog__surface {
+        max-width: 100% !important;
+    }
+}
+
+.mdc-form-field {
+    color: #BB86FC !important;
 }
 
 .table {

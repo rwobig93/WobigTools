@@ -99,9 +99,9 @@ namespace CoreLogicLib.Auto
 
         public static void ProcessAlertToSend(TrackedProduct tracker)
         {
-            Log.Debug("Processing Alert Type", tracker.AlertType);
+            Log.Debug("Processing Alert Type", tracker.AlertDestination.AlertType);
             tracker.Triggered = true;
-            switch (tracker.AlertType)
+            switch (tracker.AlertDestination.AlertType)
             {
                 case AlertType.Email:
                     Communication.SendAlertEmail(tracker);
@@ -117,12 +117,12 @@ namespace CoreLogicLib.Auto
 
         public static void ProcessAlertToReset(TrackedProduct tracker)
         {
-            Log.Debug("Processing Alert Type", tracker.AlertType);
+            Log.Debug("Processing Alert Type", tracker.AlertDestination.AlertType);
             tracker.Triggered = false;
             var msg = $"Alert has cleared for the following page:{Environment.NewLine}{tracker.PageURL}";
             var title = $"Alert has cleared for the {tracker.FriendlyName}, back to waiting :cry:";
             var color = "15730439";
-            switch (tracker.AlertType)
+            switch (tracker.AlertDestination.AlertType)
             {
                 case AlertType.Email:
                     Communication.SendAlertEmail(tracker);
@@ -138,11 +138,11 @@ namespace CoreLogicLib.Auto
 
         public static void ProcessAlertToTest(TrackedProduct tracker)
         {
-            Log.Debug("Processing Alert Type For Testing", tracker.AlertType);
+            Log.Debug("Processing Alert Type For Testing", tracker.AlertDestination.AlertType);
             string title = $"Testing alert on the the {tracker.FriendlyName} tracker, Get Pumped!";
             string msg = $"Testing the tracker for the following page: {Environment.NewLine}{tracker.PageURL}";
             string color = "16445954";
-            switch (tracker.AlertType)
+            switch (tracker.AlertDestination.AlertType)
             {
                 case AlertType.Email:
                     Communication.SendAlertEmail(tracker);

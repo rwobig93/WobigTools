@@ -7,9 +7,9 @@ namespace SharedLib.IO
 {
     public class MessageHandler
     {
-        private MessagePrefix _messagePrefix;
-        private string _messageSeperator;
-        private int _messageCountMax;
+        private readonly MessagePrefix _messagePrefix;
+        private readonly string _messageSeperator;
+        private readonly int _messageCountMax;
 
         public MessageHandler(MessagePrefix messagePrefix = MessagePrefix.Log, string messageSeperator = "~", int messageCountMax = 20)
         {
