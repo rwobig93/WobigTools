@@ -14,8 +14,15 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     color: #898989;
-    background-color: #1A191D;
+    /*background-color: #1A191D;*/
+    background-image: linear-gradient(180deg, #76B900 0%, #1A191D 7%, #121212 70%, #040404 90%);
     /*background-image: url(Images/network-dots.jpg);*/
+}
+
+@media (max-width: 620px){
+    html, body {
+        background-image: linear-gradient(180deg, #76B900 0%, #1A191D %, #121212 70%, #040404 90%);
+    }
 }
 
 a, .btn-link {
@@ -153,6 +160,7 @@ input,
 .mat-text-field-input mdc-text-field__input {
     color: #BB86FC !important;
     background-color: #121212 !important;
+    width: 90% !important;
 }
 
 .mdc-select,
@@ -178,12 +186,21 @@ input,
     background-color: #121212 !important;
     max-width: none !important;
     width: 174% !important;
+    border: 1px solid #76B900;
 }
 
-@media (max-width: 592px) {
+@media (max-width: 897px) {
     .mdc-dialog .mdc-dialog__surface {
         max-width: 100% !important;
     }
+}
+
+.mdc-radio__outer-circle {
+    border-color: #BB86FC !important;
+}
+
+.mdc-radio__inner-circle:checked {
+    border-color: #76B900 !important;
 }
 
 .mdc-form-field {
@@ -199,7 +216,7 @@ input,
 
     .table td, .table th {
         color: #898989;
-        border-color: #76B900;
+        border-color: #242424;
         padding: .75rem;
         vertical-align: top;
     }
@@ -216,7 +233,7 @@ input,
 
 .table-bordered td,
 .table-bordered th {
-    border: 1px solid #76B900
+    border: 1px solid #76B900;
 }
 
 .table-dark {

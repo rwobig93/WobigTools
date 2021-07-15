@@ -20,30 +20,29 @@
     <EditForm Model="@newProduct" OnValidSubmit="@AddWatcher">
         <DataAnnotationsValidator />
         <ValidationSummary />
-        <table class="table">
+        <table class="table" width="95%">
             <tbody>
                 <tr>
-                    <td width="17%">Friendly Name:</td>
-                    <td width="85%">
-                        <InputText style="width: 90%;" @bind-Value="newProduct.FriendlyName" />
+                    <td width="90%">
+                        <MatTextField Label="Friendly Name" @bind-Value="newProduct.FriendlyName" TValue="string" Required="true" />
                     </td>
                 </tr>
                 <tr>
-                    <td width="17%">Page URL:</td>
-                    <td width="85%">
-                        <InputText style="width: 90%;" @bind-Value="newProduct.PageURL" />
+                    <td width="90%">
+                        <MatTextField Label="Page URL" @bind-Value="newProduct.PageURL" TValue="string" Required="true" />
                     </td>
                 </tr>
                 <tr>
-                    <td width="17%">Keyword:</td>
-                    <td width="85%">
-                        <InputText style="width: 90%;" @bind-Value="newProduct.Keyword" />
+                    <td width="90%">
+                        <MatTooltip Tooltip="Must match page source, right click > inspect to see actual the actual value">
+                            <MatTextField Label="Keyword" @bind-Value="newProduct.Keyword" TValue="string" Required="true" />
+                        </MatTooltip>
                     </td>
                 </tr>
                 <tr>
-                    <td width="17%">Alert When:</td>
-                    <td width="85%">
-                       <div>
+                    <td width="90%">
+                       <div>Alert When:</div>
+                        <div>
                            <MatRadioGroup @bind-Value="@newProduct.AlertOnKeywordNotExist" TValue="bool">
                                <MatRadioButton Value="@true" TValue="bool">Keyword Doesn't Exist</MatRadioButton>
                                <MatRadioButton Value="@false" TValue="bool">Keyword Exists</MatRadioButton>
@@ -52,8 +51,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <td width="17%">Alert Destination:</td>
-                    <td width="85%">
+                    <td width="90%">
                         <MatSelect Label="Alert Destination" @bind-Value="@newProduct.AlertDestinationID">
                             @foreach (var alertDest in Constants.SavedData.Alerts)
                             {
@@ -78,73 +76,75 @@
     <EditForm Model="@newAlert" OnValidSubmit="@AddAlertDestination">
         <DataAnnotationsValidator />
         <ValidationSummary />
-        <table class="table">
+        <table class="table" width="90%">
             <tbody>
                 <tr>
-                    <td width="25%">Alert Name:</td>
-                    <td width="70%">
-                        <InputText style="width: 90%;" @bind-Value="newAlert.AlertName" />
+                    <td>
+                        <MatTextField Label="Alert Name" @bind-Value="newAlert.AlertName" TValue="string" Required="true"></MatTextField>
                     </td>
-                </tr>
-                <tr>
-                    <td width="20%">Alert Type:</td>
-                    <td width="80%">
-                        <select style="width: 90%;" class="form-control selectpicker" @bind="newAlert.AlertType">
-                            <option value=0>Email</option>
-                            <option value=1>Discord</option>
-                            <option value=2>Email And Discord</option>
-                        </select>
+                    <td>
+                        <MatSelect Label="Alert Destination" @bind-Value="@newAlert.AlertType">
+                            <MatOption Value="0">Email</MatOption>
+                            <MatOption Value="1">Discord</MatOption>
+                            <MatOption Value="2">Email And Discord</MatOption>
+                        </MatSelect>
                     </td>
                 </tr>
                 @if (newAlert.AlertType == 0)
                 {
                     <tr>
-                        <td width="25%">Email(s):</td>
-                        <td width="70%">
-                            <InputText style="width: 90%;" @bind-Value="newAlert.Emails" /><br />
+                        <td width="90%">
+                            <MatTooltip Tooltip="Seperate multiple emails with a ;">
+                                <MatTextField Label="Email(s)" Style="width: 90% !important;" @bind-Value="newAlert.Emails" TValue="string" Required="true"></MatTextField>
+                            </MatTooltip>
                         </td>
                     </tr>
                 }
                 @if (newAlert.AlertType == 1)
                 {
                     <tr>
-                        <td width="25%">Discord Webhook URL:</td>
-                        <td width="70%">
-                            <InputText style="width: 90%;" @bind-Value="newAlert.WebHookURL" />
+                        <td width="45%">
+                            <MatTextField Label="Discord Webhook URL" @bind-Value="newAlert.WebHookURL" />
+                        </td>
+                        <td width="35%">
+                            <MatTooltip Tooltip="Only the ID, no <> or @@">
+                                <MatTextField Label="Discord Mention ID" @bind-Value="newAlert.MentionString" />
+                            </MatTooltip>
                         </td>
                     </tr>
                     <tr>
-                        <td width="25%">Discord Mention ID:</td>
-                        <td width="70%">
-                            <InputText style="width: 90%;" @bind-Value="newAlert.MentionString" />
+                        <td>
                         </td>
-                    </tr>
-                    <tr>
-                        <MatButtonLink Target="_blank" Href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-">How to find a Discord ID</MatButtonLink>
+                        <td class="horizontal-center">
+                            <MatButtonLink Target="_blank" Href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-">How to find a Discord ID</MatButtonLink>
+                        </td>
                     </tr>
                 }
                 @if (newAlert.AlertType == 2)
                 {
                     <tr>
-                        <td width="25%">Email(s):</td>
-                        <td width="70%">
-                            <InputText style="width: 90%;" @bind-Value="newAlert.Emails" />
+                        <td width="90%">
+                            <MatTooltip Tooltip="Seperate multiple emails with a ;">
+                                <MatTextField Label="Email(s)" Style="width: 90% !important;" @bind-Value="newAlert.Emails" TValue="string" Required="true"></MatTextField>
+                            </MatTooltip>
                         </td>
                     </tr>
                     <tr>
-                        <td width="25%">Discord Webhook URL:</td>
-                        <td width="70%">
-                            <InputText style="width: 90%;" @bind-Value="newAlert.WebHookURL" />
+                        <td width="45%">
+                            <MatTextField Label="Discord Webhook URL" @bind-Value="newAlert.WebHookURL" />
+                        </td>
+                        <td width="45%">
+                            <MatTooltip Tooltip="Only the ID, no <> or @@">
+                                <MatTextField Label="Discord Mention ID" @bind-Value="newAlert.MentionString" />
+                            </MatTooltip>
                         </td>
                     </tr>
                     <tr>
-                        <td width="25%">Discord Mention ID:</td>
-                        <td width="70%">
-                            <InputText style="width: 90%;" @bind-Value="newAlert.MentionString" />
+                        <td>
                         </td>
-                    </tr>
-                    <tr>
-                        <MatButtonLink Target="_blank" Href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-">How to find a Discord ID</MatButtonLink>
+                        <td class="horizontal-center">
+                            <MatButtonLink Target="_blank" Href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-">How to find a Discord ID</MatButtonLink>
+                        </td>
                     </tr>
                 }
             </tbody>
