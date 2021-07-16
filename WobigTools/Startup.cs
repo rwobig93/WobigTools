@@ -1,4 +1,3 @@
-using CoreLogicLib.Standard;
 using DataAccessLib.External;
 using DataAccessLib.Queriables;
 using Microsoft.AspNetCore.Builder;
@@ -11,6 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using WobigTools.Data;
 using MatBlazor;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+using Microsoft.AspNetCore.Components;
 
 namespace WobigTools
 {
@@ -43,6 +44,22 @@ namespace WobigTools
                 config.MaximumOpacity = 95;
                 config.VisibleStateDuration = 5000;
             });
+            services.AddAuthentication("Cookies").AddCookie(opt =>
+            {
+                opt.Cookie.Name = "GoogleAuth";
+                opt.LoginPath = "/auth/google";
+            }).AddGoogle(opt =>
+            {
+                opt.ClientId = Configuration["Google:ClientId"];
+                opt.ClientSecret = Configuration["Google:Secret"];
+                opt.Scope.Add("profile");
+                opt.Events.OnCreatingTicket = context =>
+                {
+                    string picUri = context.User.GetProperty("picture").GetString();
+                    context.Identity.AddClaim(new System.Security.Claims.Claim("picture", picUri));
+                    return Task.CompletedTask;
+                };
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -58,17 +75,29 @@ namespace WobigTools
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();
 
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllers();
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
+        }
+    }
+
+    public class CustomAuthenticationMessageHandler : AuthorizationMessageHandler
+    {
+        public CustomAuthenticationMessageHandler(IAccessTokenProvider provider, NavigationManager nav) : base(provider, nav)
+        {
+            ConfigureHandler(new string[] { "https://auth.wobigtech.net/auth/" });
         }
     }
 

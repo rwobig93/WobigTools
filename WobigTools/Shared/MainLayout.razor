@@ -17,7 +17,22 @@
 
     <div class="main">
         <div class="top-row px-4">
-            <a href="https://wobigtech.net" target="_blank">Wobigtech.net</a>
+            <AuthorizeView>
+                <Authorized>
+                    @if (context != null)
+                    {
+                        <img class="profile-image" src="@context.User.Claims.Where(s => s.Type == "picture").FirstOrDefault().Value" />
+                        @*<a href="https://wobigtech.net" target="_blank">Wobigtech.net</a>*@
+                    }
+                    else
+                    {
+                        <img class="profile-image" src="https://lh4.googleusercontent.com/-pcIqLhnW714/AAAAAAAAAAI/AAAAAAAAAAA/EVtebngxjds/W96-H96/photo.jpg" />
+                    }
+                </Authorized>
+                <NotAuthorized>
+                    <a href="auth/google" class="btn btn-primary text-center">Google Login</a>
+                </NotAuthorized>
+            </AuthorizeView>
         </div>
 
         <div class="content px-4">

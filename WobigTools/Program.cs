@@ -3,6 +3,8 @@ using Microsoft.Extensions.Hosting;
 using CoreLogicLib.Standard;
 using SharedLib.Dto;
 using WobigTools.Shared;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+using Microsoft.AspNetCore.Components;
 
 namespace WobigTools
 {

@@ -45,7 +45,7 @@ namespace CoreLogicLib.Comm
                 }
                 string jsonSend = JsonConvert.SerializeObject(new
                 {
-                    username = "ArbitraryBot",
+                    username = "WobigTools",
                     avatar_url = Constants.WebHookAvatarURL,
                     embeds = new[]
                         {

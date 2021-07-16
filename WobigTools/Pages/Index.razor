@@ -4,18 +4,42 @@
 
 @inject IMatToaster Toaster
 
-<h1>Get back to work Rick!</h1>
+<AuthorizeView>
+    <Authorized>
+        @*<table class="horizontal-center">
+            <tr>
+                <td width="15%">
+                    <img width="50" height="50" src="@context.User.Claims.Where(s => s.Type == "picture").FirstOrDefault().Value" />
+                </td>
+                <td width="50%">
+                    <div>Your Email: @context.User.Claims.Where(e => e.Type.EndsWith("emailaddress")).FirstOrDefault().Value</div>
+                    <div>Your Name: @context.User.Claims.Where(e => e.Type.EndsWith("name")).FirstOrDefault().Value</div>
+                    <div>Your ID: @context.User.Claims.Where(e => e.Type.EndsWith("nameidentifier")).FirstOrDefault().Value</div>
+                </td>
+            </tr>
+        </table>*@
 
-<button class="btn btn-primary" @onclick="AddLog">Add Log</button>
-<button class="btn btn-secondary" @onclick="ToastBarage">Toast Barage!</button>
+        <h1 class="horizontal-center">Get back to work Rick!</h1>
 
-<h2> Log Output: </h2>
-<div class="textarea">
-    @foreach (var line in Constants.DebugLog.Messages)
-    {
-        <div class="display-message">@line</div>
-    }
-</div>
+        <div class="horizontal-center">
+            <button class="btn btn-primary" @onclick="AddLog">Add Log</button>
+            <button class="btn btn-secondary" @onclick="ToastBarage">Toast Barage!</button>
+            <button class="btn btn-danger" @onclick="(() => TestButton(context))">Dangerous button</button>
+        </div>
+        <br />
+        <br />
+        <h2 class="horizontal-center"> Log Output: </h2>
+        <div class="textarea">
+            @foreach (var line in Constants.DebugLog.Messages)
+            {
+                <div class="display-message">@line</div>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <WobigTools.Pages.Auth.UnAuthorizedLogin />
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     protected override void OnInitialized()
@@ -37,12 +61,23 @@
         });
     }
 
-    private async void ToastBarage()
+    private async Task ToastBarage()
     {
         Toaster.CustomToast("Test Toast Yo!", "Test Toast Danger", MatToastType.Danger);
         Toaster.CustomToast("Test Toast Yo!", "Test Toast Info", MatToastType.Info);
         Toaster.CustomToast("Test Toast Yo!", "Test Toast Primary", MatToastType.Primary);
         Toaster.CustomToast("Test Toast Yo!", "Test Toast Success", MatToastType.Success);
         Toaster.CustomToast("Test Toast Yo!", "Test Toast Warning", MatToastType.Warning);
+        await Task.CompletedTask;
+    }
+
+    private async Task TestButton(AuthenticationState context)
+    {
+        foreach (var claim in context.User.Claims)
+        {
+            var claimTest = claim;
+            var userTest = context.User;
+            var test = context.User.Identity;
+        }
     }
 }
