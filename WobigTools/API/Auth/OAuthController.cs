@@ -22,14 +22,16 @@ namespace WobigTools.API.Auth
         }
 
         [HttpGet("logout")]
-        public async Task Logout()
+        public async Task<HttpResponse> Logout()
         {
             await Task.CompletedTask;
-            HttpContext.Response.Cookies.Delete("GoogleAuth"); 
             Response.Cookies.Delete("GoogleAuth", new CookieOptions()
             {
-                Secure = true
+                Secure = true,
+                Expires = System.DateTimeOffset.Now
             });
+            Response.Redirect("/Watchers/List");
+            return Response;
         }
     }
 }

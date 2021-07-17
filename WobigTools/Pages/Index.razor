@@ -1,25 +1,13 @@
 ﻿@page "/"
 @using SharedLib.General
 @using MatBlazor
-@using System.Security.Claims
+@using SharedLib.Auth
+@using SharedLib.Extensions 
 
 @inject IMatToaster Toaster
 
 <AuthorizeView>
     <Authorized>
-        @*<table class="horizontal-center">
-            <tr>
-                <td width="15%">
-                    <img width="50" height="50" src="@context.User.Claims.Where(s => s.Type == "picture").FirstOrDefault().Value" />
-                </td>
-                <td width="50%">
-                    <div>Your Email: @context.User.Claims.Where(e => e.Type.EndsWith("emailaddress")).FirstOrDefault().Value</div>
-                    <div>Your Name: @context.User.Claims.Where(e => e.Type.EndsWith("name")).FirstOrDefault().Value</div>
-                    <div>Your ID: @context.User.Claims.Where(e => e.Type.EndsWith("nameidentifier")).FirstOrDefault().Value</div>
-                </td>
-            </tr>
-        </table>*@
-
         <h1 class="horizontal-center">Get back to work Rick!</h1>
 
         <div class="horizontal-center">
@@ -75,8 +63,14 @@
 
     private async Task TestButton(AuthenticationState context)
     {
-        HttpClient client = new HttpClient();
-        await client.GetAsync("https://localhost:44344/oauth/logout");
-        StateHasChanged();
+        CoreLogicLib.Auth.Operations.ValidateUserProfile(context.User.GetEmail());
+        var userProfile = Constants.SavedData.UserProfiles.GetUserProfile(context.User.GetEmail());
+        if (userProfile != null)
+        {
+            var adminFullAccess = Constants.SavedData.Accesses.CreateAccess("FullAdmin", "Admin", AccessType.Write);
+            var adminRole = Constants.SavedData.AccessRoles.CreateRole("Admin");
+            userProfile.AuthRoles.Add(adminRole);
+            Toaster.CustomToast("Access Granted!", "You have admin now", MatToastType.Success);
+        }
     }
 }

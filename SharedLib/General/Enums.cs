@@ -33,4 +33,10 @@
         Log,
         None
     }
+
+    public enum AccessType
+    {
+        Read,
+        Write
+    }
 }

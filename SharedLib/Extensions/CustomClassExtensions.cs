@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
 using MatBlazor;
@@ -106,6 +108,58 @@ namespace SharedLib.Extensions
             catch (RegexMatchTimeoutException)
             {
                 return false;
+            }
+        }
+
+        public static string GetEmail(this ClaimsPrincipal user)
+        {
+            var emailAddress = user.Claims.Where(x => x.Type.EndsWith("emailaddress")).FirstOrDefault().Value;
+            if (!string.IsNullOrWhiteSpace(emailAddress))
+            {
+                return emailAddress;
+            }
+            else
+            {
+                return "INVALIDEMAILADDRESS@EXAMPLE.COM";
+            }
+        }
+
+        public static string GetName(this ClaimsPrincipal user)
+        {
+            var name = user.Claims.Where(x => x.Type.EndsWith("name")).FirstOrDefault().Value;
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                return name;
+            }
+            else
+            {
+                return "INVALIDNAME";
+            }
+        }
+
+        public static string GetNameID(this ClaimsPrincipal user)
+        {
+            var nameID = user.Claims.Where(x => x.Type.EndsWith("nameidentifier")).FirstOrDefault().Value;
+            if (!string.IsNullOrWhiteSpace(nameID))
+            {
+                return nameID;
+            }
+            else
+            {
+                return "INVALIDNAMEID";
+            }
+        }
+
+        public static string GetPictureUrl(this ClaimsPrincipal user)
+        {
+            var picUrl = user.Claims.Where(x => x.Type.EndsWith("picture")).FirstOrDefault().Value;
+            if (!string.IsNullOrWhiteSpace(picUrl))
+            {
+                return picUrl;
+            }
+            else
+            {
+                return "https://lh4.googleusercontent.com/-pcIqLhnW714/AAAAAAAAAAI/AAAAAAAAAAA/EVtebngxjds/W96-H96/photo.jpg";
             }
         }
     }

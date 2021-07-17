@@ -7,6 +7,7 @@ using SharedLib.General;
 using SharedLib.Extensions;
 using CoreLogicLib.Auto;
 using Microsoft.Extensions.Configuration;
+using CoreLogicLib.Auth;
 
 namespace CoreLogicLib.Standard
 {
@@ -43,6 +44,11 @@ namespace CoreLogicLib.Standard
                 Log.Information("LogUri is Public1");
             else
                 Log.Information("LogUri is Public2");
+        }
+
+        public static void SetupAuth()
+        {
+            Operations.InitializeAuth();
         }
 
         public static void SaveEverything()

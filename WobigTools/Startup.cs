@@ -12,6 +12,8 @@ using WobigTools.Data;
 using MatBlazor;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using DataAccessLib.Auth;
 
 namespace WobigTools
 {
@@ -48,6 +50,7 @@ namespace WobigTools
             {
                 opt.Cookie.Name = "GoogleAuth";
                 opt.LoginPath = "/oauth/google";
+                opt.CookieManager = new ChunkingCookieManager();
             }).AddGoogle(opt =>
             {
                 opt.ClientId = Configuration["Google:ClientId"];
