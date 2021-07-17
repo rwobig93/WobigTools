@@ -47,7 +47,7 @@ namespace WobigTools
             services.AddAuthentication("Cookies").AddCookie(opt =>
             {
                 opt.Cookie.Name = "GoogleAuth";
-                opt.LoginPath = "/auth/google";
+                opt.LoginPath = "/oauth/google";
             }).AddGoogle(opt =>
             {
                 opt.ClientId = Configuration["Google:ClientId"];

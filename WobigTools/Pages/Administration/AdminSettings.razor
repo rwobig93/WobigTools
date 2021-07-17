@@ -5,7 +5,7 @@
 
 @inject IMatToaster Toaster
 
-<AuthorizeView>
+<AuthorizeView Roles="Admin">
     <Authorized>
         <h3>SMTP Settings for Email</h3>
         <EditForm Model="@settingsSMTP" OnValidSubmit="@SetSMTPSettings">

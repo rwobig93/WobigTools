@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using SharedLib.General
 @using MatBlazor
+@using System.Security.Claims
 
 @inject IMatToaster Toaster
 
@@ -25,6 +26,7 @@
             <button class="btn btn-primary" @onclick="AddLog">Add Log</button>
             <button class="btn btn-secondary" @onclick="ToastBarage">Toast Barage!</button>
             <button class="btn btn-danger" @onclick="(() => TestButton(context))">Dangerous button</button>
+            <a href="rename/testing" class="btn btn-primary text-center">Test Testing</a>
         </div>
         <br />
         <br />
@@ -73,11 +75,8 @@
 
     private async Task TestButton(AuthenticationState context)
     {
-        foreach (var claim in context.User.Claims)
-        {
-            var claimTest = claim;
-            var userTest = context.User;
-            var test = context.User.Identity;
-        }
+        HttpClient client = new HttpClient();
+        await client.GetAsync("https://localhost:44344/oauth/logout");
+        StateHasChanged();
     }
 }

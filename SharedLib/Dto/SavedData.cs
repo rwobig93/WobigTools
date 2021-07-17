@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Claims;
 using Newtonsoft.Json;
 using Serilog;
 using SharedLib.General;
@@ -14,6 +15,11 @@ namespace SharedLib.Dto
     {
         public List<TrackedProduct> TrackedProducts { get; set; } = new List<TrackedProduct>();
         public List<Alert> Alerts { get; set; } = new List<Alert>();
+        public List<Claim> SecurityRoles { get; set; } = new List<Claim>() 
+        { 
+            new Claim(ClaimTypes.Role, "Admin"),
+            new Claim(ClaimTypes.Role, "Everyone")
+        };
 
         public static StatusReturn Load()
         {
