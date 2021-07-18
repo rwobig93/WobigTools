@@ -2,7 +2,8 @@
 @using SharedLib.General
 @using MatBlazor
 @using SharedLib.Auth
-@using SharedLib.Extensions 
+@using SharedLib.Extensions
+@using Microsoft.AspNetCore.Components.Authorization
 
 @inject IMatToaster Toaster
 
@@ -14,7 +15,7 @@
             <button class="btn btn-primary" @onclick="AddLog">Add Log</button>
             <button class="btn btn-secondary" @onclick="ToastBarage">Toast Barage!</button>
             <button class="btn btn-danger" @onclick="(() => TestButton(context))">Dangerous button</button>
-            <a href="rename/testing" class="btn btn-primary text-center">Test Testing</a>
+            <button class="btn btn-danger" @onclick="(() => TestButton2(context))">Undangerous button</button>
         </div>
         <br />
         <br />
@@ -67,10 +68,23 @@
         var userProfile = Constants.SavedData.UserProfiles.GetUserProfile(context.User.GetEmail());
         if (userProfile != null)
         {
-            var adminFullAccess = Constants.SavedData.Accesses.CreateAccess("FullAdmin", "Admin", AccessType.Write);
-            var adminRole = Constants.SavedData.AccessRoles.CreateRole("Admin");
+            var adminRole = Constants.SavedData.AccessRoles.GetRole("Admin");
             userProfile.AuthRoles.Add(adminRole);
             Toaster.CustomToast("Access Granted!", "You have admin now", MatToastType.Success);
+            StateHasChanged();
+        }
+    }
+
+    private async Task TestButton2(AuthenticationState context)
+    {
+        CoreLogicLib.Auth.Operations.ValidateUserProfile(context.User.GetEmail());
+        var userProfile = Constants.SavedData.UserProfiles.GetUserProfile(context.User.GetEmail());
+        if (userProfile != null)
+        {
+            var adminRole = Constants.SavedData.AccessRoles.GetRole("Admin");
+            userProfile.AuthRoles.Remove(adminRole);
+            Toaster.CustomToast("Access Revoked!", "You no admin now", MatToastType.Success);
+            StateHasChanged();
         }
     }
 }

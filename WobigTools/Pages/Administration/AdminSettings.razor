@@ -1,67 +1,75 @@
 ﻿@page "/Administration/Settings"
 @using System.ComponentModel.DataAnnotations;
 @using Microsoft.AspNetCore.Authorization 
+@using SharedLib.Auth
+
 @attribute [Authorize]
 
 @inject IMatToaster Toaster
 
-<AuthorizeView Roles="Admin">
+<AuthorizeView>
     <Authorized>
-        <h3>SMTP Settings for Email</h3>
-        <EditForm Model="@settingsSMTP" OnValidSubmit="@SetSMTPSettings">
-            <ChildContent Context="editContext">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
+        @if (context.User.UserProfileHasAccess("Admin"))
+        {
+            <h3>SMTP Settings for Email</h3>
+            <EditForm Model="@settingsSMTP" OnValidSubmit="@SetSMTPSettings">
+                <ChildContent Context="editContext">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
 
-                <table class="table">
-                    <tbody>
-                        <tr>
-                            <td>
-                                <MatTextField Label="From Email Address" @bind-Value="settingsSMTP.EmailFrom" TValue="string" Required="true"></MatTextField>
-                                <ValidationMessage For="@(() => settingsSMTP.EmailFrom)" />
-                            </td>
-                            <td>
-                                <MatTextField Label="From Name" @bind-Value="settingsSMTP.EmailName" TValue="string" Required="true"></MatTextField>
-                                <ValidationMessage For="@(() => settingsSMTP.EmailName)" />
-                            </td>
-                            <td>
-                                <MatTextField Label="Login Username" @bind-Value="settingsSMTP.Username" TValue="string" Required="true"></MatTextField>
-                                <ValidationMessage For="@(() => settingsSMTP.Username)" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <MatTextField Label="SMTP Host URL" @bind-Value="settingsSMTP.Host" TValue="string" Required="true"></MatTextField>
-                                <ValidationMessage For="@(() => settingsSMTP.Host)" />
-                            </td>
-                            <td>
-                                <MatTextField Label="SMTP Port" @bind-Value="settingsSMTP.Port" TValue="int" Required="true"></MatTextField>
-                                <ValidationMessage For="@(() => settingsSMTP.Port)" />
-                            </td>
-                            <td>
-                                <MatTextField Label="Login Password" @bind-Value="settingsSMTP.Password" TValue="string" Required="true" Type="password"></MatTextField>
-                                <ValidationMessage For="@(() => settingsSMTP.Password)" />
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </ChildContent>
-        </EditForm>
-        <br />
-        <h4>Test SMTP</h4>
-        <table class="table">
-            <tbody>
-                <tr>
-                    <td width="15%" align="center" valign="middle">Send To Address:</td>
-                    <td width="80%">
-                        <MatTextField Label="Send To Address" Style="width: 50%" PlaceHolder="Send To Address" Id="sendToAddress" @bind-Value="smtpTestAddress" TValue="string"></MatTextField>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <button type="button" style="align-content: center" class="btn btn-secondary" @onclick="TestSMTP">Test SMTP</button>
-
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <MatTextField Label="From Email Address" @bind-Value="settingsSMTP.EmailFrom" TValue="string" Required="true"></MatTextField>
+                                    <ValidationMessage For="@(() => settingsSMTP.EmailFrom)" />
+                                </td>
+                                <td>
+                                    <MatTextField Label="From Name" @bind-Value="settingsSMTP.EmailName" TValue="string" Required="true"></MatTextField>
+                                    <ValidationMessage For="@(() => settingsSMTP.EmailName)" />
+                                </td>
+                                <td>
+                                    <MatTextField Label="Login Username" @bind-Value="settingsSMTP.Username" TValue="string" Required="true"></MatTextField>
+                                    <ValidationMessage For="@(() => settingsSMTP.Username)" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <MatTextField Label="SMTP Host URL" @bind-Value="settingsSMTP.Host" TValue="string" Required="true"></MatTextField>
+                                    <ValidationMessage For="@(() => settingsSMTP.Host)" />
+                                </td>
+                                <td>
+                                    <MatTextField Label="SMTP Port" @bind-Value="settingsSMTP.Port" TValue="int" Required="true"></MatTextField>
+                                    <ValidationMessage For="@(() => settingsSMTP.Port)" />
+                                </td>
+                                <td>
+                                    <MatTextField Label="Login Password" @bind-Value="settingsSMTP.Password" TValue="string" Required="true" Type="password"></MatTextField>
+                                    <ValidationMessage For="@(() => settingsSMTP.Password)" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </ChildContent>
+            </EditForm>
+            <br />
+            <h4>Test SMTP</h4>
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <td width="15%" align="center" valign="middle">Send To Address:</td>
+                        <td width="80%">
+                            <MatTextField Label="Send To Address" Style="width: 50%" PlaceHolder="Send To Address" Id="sendToAddress" @bind-Value="smtpTestAddress" TValue="string"></MatTextField>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <button type="button" style="align-content: center" class="btn btn-secondary" @onclick="TestSMTP">Test SMTP</button>
+        }
+        else
+        {
+            <WobigTools.Pages.Auth.Unauthorized />
+        }
     </Authorized>
     <NotAuthorized>
         <WobigTools.Pages.Auth.UnAuthorizedLogin />

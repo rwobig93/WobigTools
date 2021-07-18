@@ -13,7 +13,6 @@ using MatBlazor;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using DataAccessLib.Auth;
 
 namespace WobigTools
 {

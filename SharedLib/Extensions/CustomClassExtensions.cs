@@ -49,7 +49,7 @@ namespace SharedLib.Extensions
             }
         }
 
-        public static void CustomToast(this IMatToaster toaster, string message, string title, MatToastType toastType, int duration = 5000, string icon = "")
+        public static void CustomToast(this IMatToaster toaster, string title, string message, MatToastType toastType, int duration = 5000, string icon = "")
         {
             if (icon != "")
             {
