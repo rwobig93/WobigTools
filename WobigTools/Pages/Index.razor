@@ -1,11 +1,13 @@
 ﻿@page "/"
 @using SharedLib.General
 @using MatBlazor
-@using SharedLib.Auth
 @using SharedLib.Extensions
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
 
 @inject IMatToaster Toaster
+@inject UserManager<IdentityUser> _userManager
+@inject RoleManager<IdentityRole> _roleManager
 
 <AuthorizeView>
     <Authorized>
@@ -14,8 +16,13 @@
         <div class="horizontal-center">
             <button class="btn btn-primary" @onclick="AddLog">Add Log</button>
             <button class="btn btn-secondary" @onclick="ToastBarage">Toast Barage!</button>
-            <button class="btn btn-danger" @onclick="(() => TestButton(context))">Dangerous button</button>
-            <button class="btn btn-danger" @onclick="(() => TestButton2(context))">Undangerous button</button>
+            <button class="btn btn-primary" @onclick="(() => TestButton())">Show Users</button>
+            <button class="btn btn-secondary" @onclick="(() => TestButton2())">Show Roles</button>
+        </div>
+        <div class="horizontal-center">
+            <button class="btn btn-danger" @onclick="(() => TestButton3())">Dangerous button</button>
+            <button class="btn btn-danger" @onclick="(() => TestButton4())">Undangerous button</button>
+            <button class="btn btn-danger" @onclick="(() => TestButton5())">Cool button</button>
         </div>
         <br />
         <br />
@@ -62,29 +69,97 @@
         await Task.CompletedTask;
     }
 
-    private async Task TestButton(AuthenticationState context)
+    private async Task TestButton()
     {
-        CoreLogicLib.Auth.Operations.ValidateUserProfile(context.User.GetEmail());
-        var userProfile = Constants.SavedData.UserProfiles.GetUserProfile(context.User.GetEmail());
-        if (userProfile != null)
+        var users = _userManager.Users.ToList();
+        foreach (var user in users)
         {
-            var adminRole = Constants.SavedData.AccessRoles.GetRole("Admin");
-            userProfile.AuthRoles.Add(adminRole);
-            Toaster.CustomToast("Access Granted!", "You have admin now", MatToastType.Success);
-            StateHasChanged();
+            var displayMessage = $"User: {user.Email} | {user.Id} | Roles: ";
+            foreach (var role in await _userManager.GetRolesAsync(user))
+                displayMessage += $", {role}";
+            Constants.DebugLog.AddMessage(displayMessage);
         }
     }
 
-    private async Task TestButton2(AuthenticationState context)
+    private async Task TestButton2()
     {
-        CoreLogicLib.Auth.Operations.ValidateUserProfile(context.User.GetEmail());
-        var userProfile = Constants.SavedData.UserProfiles.GetUserProfile(context.User.GetEmail());
-        if (userProfile != null)
+        var roles = _roleManager.Roles.ToList();
+        foreach (var role in roles)
         {
-            var adminRole = Constants.SavedData.AccessRoles.GetRole("Admin");
-            userProfile.AuthRoles.Remove(adminRole);
-            Toaster.CustomToast("Access Revoked!", "You no admin now", MatToastType.Success);
-            StateHasChanged();
+            Constants.DebugLog.AddMessage($"Role: {role.Name} | {role.Id} | {role.NormalizedName}");
+        }
+    }
+
+    private async Task TestButton3()
+    {
+        var user = _userManager.Users.Where(x => x.Email == "rickwobig93@gmail.com").FirstOrDefault();
+        var adminRole = _roleManager.Roles.Where(x => x.Name == "Admin").FirstOrDefault();
+        if (adminRole == null)
+        {
+            await _roleManager.CreateAsync(new IdentityRole()
+            {
+                Name = "Admin"
+            });
+            adminRole = _roleManager.Roles.Where(x => x.Name == "Admin").FirstOrDefault();
+        }
+        var isAdmin = await _userManager.IsInRoleAsync(user, adminRole.Name);
+        if (!isAdmin)
+        {
+            await _userManager.AddToRoleAsync(user, adminRole.Name);
+            Toaster.CustomToast($"Success - {user.Email}", $"Added to role: {adminRole.Name}", MatToastType.Success);
+        }
+        else
+        {
+            Toaster.CustomToast($"Same - {user.Email}", $"Already in role: {adminRole.Name}", MatToastType.Info);
+        }
+    }
+
+    private async Task TestButton4()
+    {
+        var user = _userManager.Users.Where(x => x.Email == "rickwobig93@gmail.com").FirstOrDefault();
+        var adminRole = _roleManager.Roles.Where(x => x.Name == "Admin").FirstOrDefault();
+        if (adminRole == null)
+        {
+            await _roleManager.CreateAsync(new IdentityRole()
+            {
+                Name = "Admin"
+            });
+            adminRole = _roleManager.Roles.Where(x => x.Name == "Admin").FirstOrDefault();
+        }
+        var isAdmin = await _userManager.IsInRoleAsync(user, adminRole.Name);
+        if (isAdmin)
+        {
+            await _userManager.RemoveFromRoleAsync(user, adminRole.Name);
+            Toaster.CustomToast($"Success - {user.Email}", $"Removed from role: {adminRole.Name}", MatToastType.Success);
+        }
+        else
+        {
+            Toaster.CustomToast($"Same - {user.Email}", $"Already not in role: {adminRole.Name}", MatToastType.Info);
+        }
+    }
+
+    private async Task TestButton5()
+    {
+        var user = _userManager.Users.Where(x => x.Email == "rickwobig93@gmail.com").FirstOrDefault();
+        var testRole = _roleManager.Roles.Where(x => x.Name == "TestRole").FirstOrDefault();
+        if (testRole == null)
+        {
+            await _roleManager.CreateAsync(new IdentityRole()
+            {
+                Name = "TestRole"
+            });
+            testRole = _roleManager.Roles.Where(x => x.Name == "TestRole").FirstOrDefault();
+        }
+        var isTester = await _userManager.IsInRoleAsync(user, testRole.Name);
+        if (isTester)
+        {
+            await _userManager.RemoveFromRoleAsync(user, testRole.Name);
+            Toaster.CustomToast($"Success - {user.Email}", $"Removed from role: {testRole.Name}", MatToastType.Success);
+        }
+        else
+        {
+            await _userManager.AddToRoleAsync(user, testRole.Name);
+            Toaster.CustomToast($"Success - {user.Email}", $"Added to role: {testRole.Name}", MatToastType.Success);
         }
     }
 }

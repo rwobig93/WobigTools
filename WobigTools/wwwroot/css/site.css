@@ -320,6 +320,11 @@ input,
     border-radius: 50%;
 }
 
+.nav-pad {
+    padding-left: 0.6em;
+    padding-right: 0.6em;
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;

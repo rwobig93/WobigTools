@@ -28,16 +28,13 @@
                 </li>
             </Authorized>
         </AuthorizeView>
-        <AuthorizeView>
+        <AuthorizeView Roles="Admin">
             <Authorized>
-                @if (context.User.UserProfileHasAccess("Admin"))
-                {
-                    <li class="nav-item px-3">
-                        <NavLink class="nav-link" href="Administration/Settings">
-                            <span class="oi oi-wrench" aria-hidden="true"></span> Admin Settings
-                        </NavLink>
-                    </li>
-                }
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="Administration/Settings">
+                        <span class="oi oi-wrench" aria-hidden="true"></span> Admin Settings
+                    </NavLink>
+                </li>
             </Authorized>
         </AuthorizeView>
     </ul>

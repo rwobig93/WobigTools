@@ -12,7 +12,12 @@ using WobigTools.Data;
 using MatBlazor;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server;
+using CoreLogicLib.Auth;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WobigTools
 {
@@ -29,12 +34,18 @@ namespace WobigTools
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            // Defaults
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddHostedService<LifetimeEventsHostedService>();
             services.AddSingleton<WeatherForecastService>();
+            // Server startup/close events
+            services.AddHostedService<LifetimeEventsHostedService>();
+            // Data access
             services.AddTransient<ISqlDA, MySqlDA>();
             services.AddTransient<IPeopleData, PeopleData>();
+            services.AddDbContext<AppDbContext>(opt =>
+                opt.UseSqlite("DataSource=app.db"));
+            // MatBlazor components
             services.AddMatBlazor();
             services.AddMatToaster(config =>
             {
@@ -45,22 +56,39 @@ namespace WobigTools
                 config.MaximumOpacity = 95;
                 config.VisibleStateDuration = 5000;
             });
-            services.AddAuthentication("Cookies").AddCookie(opt =>
-            {
-                opt.Cookie.Name = "GoogleAuth";
-                opt.LoginPath = "/oauth/google";
-                opt.CookieManager = new ChunkingCookieManager();
-            }).AddGoogle(opt =>
-            {
-                opt.ClientId = Configuration["Google:ClientId"];
-                opt.ClientSecret = Configuration["Google:Secret"];
-                opt.Scope.Add("profile");
-                opt.Events.OnCreatingTicket = context =>
+            // Authentication & Authorization
+            services.AddDefaultIdentity<IdentityUser>()
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<AppDbContext>();
+            services.AddTransient<UserManager<IdentityUser>>();
+            services.AddTransient<RoleManager<IdentityRole>>();
+            services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
+            services.AddSingleton<IAuthorizationHandler, IsTheOnePolicyHandler>();
+            // Oauth providers
+            //
+            // "Cookies"
+            //.AddCookie(opt =>
+            // {
+            //     opt.Cookie.Name = "GoogleAuth";
+            //     //opt.LoginPath = "/oauth/google";
+            //     opt.CookieManager = new ChunkingCookieManager();
+            // })
+            services.AddAuthentication()
+                .AddGoogle(opt =>
                 {
-                    string picUri = context.User.GetProperty("picture").GetString();
-                    context.Identity.AddClaim(new System.Security.Claims.Claim("picture", picUri));
-                    return Task.CompletedTask;
-                };
+                    opt.ClientId = Configuration["Google:ClientId"];
+                    opt.ClientSecret = Configuration["Google:Secret"];
+                    opt.Scope.Add("profile");
+                    opt.Events.OnCreatingTicket = context =>
+                    {
+                        string picUri = context.User.GetProperty("picture").GetString();
+                        context.Identity.AddClaim(new System.Security.Claims.Claim("picture", picUri));
+                        return Task.CompletedTask;
+                    };
+                });
+            services.AddAuthorization(opt =>
+            {
+                opt.AddPolicy("IsTheOne", policy => policy.AddRequirements(new IsTheOnePolicyRequirement("rickwobig93@gmail.com")));
             });
         }
 

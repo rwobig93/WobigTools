@@ -17,22 +17,7 @@
 
     <div class="main">
         <div class="top-row px-4">
-            <AuthorizeView>
-                <Authorized>
-                    @if (context != null)
-                    {
-                        <img class="profile-image" src="@context.User.Claims.Where(s => s.Type == "picture").FirstOrDefault().Value" />
-                        @*<a href="https://wobigtech.net" target="_blank">Wobigtech.net</a>*@
-                    }
-                    else
-                    {
-                        <img class="profile-image" src="https://lh4.googleusercontent.com/-pcIqLhnW714/AAAAAAAAAAI/AAAAAAAAAAA/EVtebngxjds/W96-H96/photo.jpg" />
-                    }
-                </Authorized>
-                <NotAuthorized>
-                    <img class="profile-image" src="https://lh4.googleusercontent.com/-pcIqLhnW714/AAAAAAAAAAI/AAAAAAAAAAA/EVtebngxjds/W96-H96/photo.jpg" />
-                </NotAuthorized>
-            </AuthorizeView>
+            <WobigTools.Pages.Auth.LoginDisplay />
         </div>
 
         <div class="content px-4">

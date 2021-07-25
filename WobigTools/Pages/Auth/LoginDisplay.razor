@@ -1,0 +1,26 @@
+﻿<AuthorizeView>
+    <Authorized>
+        <a href="/Identity/Account/Manage" class="nav-pad">Hello, @context.User.Identity.Name!</a>
+        <form action="/Identity/Account/Logout">
+            <button type="submit" class="btn btn-primary nav-pad">Log out</button>
+        </form>
+        @if (context != null)
+        {
+            @*<img class="profile-image" src="@context.User.Claims.Where(s => s.Type == "picture")?.FirstOrDefault().Value" />*@
+            @*<a href="https://wobigtech.net" target="_blank">Wobigtech.net</a>*@
+        }
+        else
+        {
+            @*<img class="profile-image" src="https://lh4.googleusercontent.com/-pcIqLhnW714/AAAAAAAAAAI/AAAAAAAAAAA/EVtebngxjds/W96-H96/photo.jpg" />*@
+        }
+    </Authorized>
+    <NotAuthorized>
+        <a href="/Identity/Account/Register">Register</a>
+        <a href="/Identity/Account/Login">Login</a>
+        @*<img class="profile-image" src="https://lh4.googleusercontent.com/-pcIqLhnW714/AAAAAAAAAAI/AAAAAAAAAAA/EVtebngxjds/W96-H96/photo.jpg" />*@
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+}
