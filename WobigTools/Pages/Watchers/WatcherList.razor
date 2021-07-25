@@ -7,6 +7,8 @@
 
 @inject IMatToaster Toaster
 
+@attribute [Authorize(Roles = "WatcherList")] 
+
 <h4 style="text-align: center">Options</h4>
 <div class="row">
     <div class="col text-center">
@@ -204,29 +206,33 @@
 
     protected override async Task OnInitializedAsync()
     {
-
+        await Task.CompletedTask;
     }
 
     private async Task OpenAddAlertDestination()
     {
         menuOpenAlerts = true;
+        await Task.CompletedTask;
     }
 
     private async Task CloseAddAlertDestination()
     {
         menuOpenAlerts = false;
         newAlert = new DisplayAlertModel();
+        await Task.CompletedTask;
     }
 
     private async Task OpenAddWatcher()
     {
         menuOpenWatcher = true;
+        await Task.CompletedTask;
     }
 
     private async Task CloseAddWatcher()
     {
         menuOpenWatcher = false;
         newProduct = new DisplayTrackedProductModel();
+        await Task.CompletedTask;
     }
 
     private async Task AddAlertDestination()
@@ -273,6 +279,7 @@
             newAlert = new DisplayAlertModel();
             menuOpenAlerts = false;
         }
+        await Task.CompletedTask;
     }
 
     private async Task AddWatcher()
@@ -306,6 +313,7 @@
             newProduct = new DisplayTrackedProductModel();
             menuOpenWatcher = false;
         }
+        await Task.CompletedTask;
     }
 
     private async Task ToggleWatcher(TrackedProduct product)
@@ -314,6 +322,7 @@
         Log.Information("Tracker toggled: {TrackerID} | {TrackerFriendlyName} | State: {TrackerState}", product.TrackerID, product.FriendlyName, product.Enabled);
         SavedData.Save();
         StateHasChanged();
+        await Task.CompletedTask;
     }
 
     private async Task DeleteWatcher(TrackedProduct product)
@@ -322,5 +331,6 @@
         Constants.SavedData.TrackedProducts.Remove(product);
         SavedData.Save();
         StateHasChanged();
+        await Task.CompletedTask;
     }
 }

@@ -16,7 +16,6 @@ namespace WobigTools
                 Core.InitializeFirstRun();
             }
             Core.ProcessSettingsFromConfig();
-            Core.SetupAuth();
             Core.StartServices();
             
             CreateHostBuilder(args).Build().Run();

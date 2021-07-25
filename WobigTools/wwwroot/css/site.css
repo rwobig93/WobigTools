@@ -16,12 +16,19 @@ html, body {
     color: #898989;
     /*background-color: #1A191D;*/
     background-image: linear-gradient(180deg, #76B900 0%, #1A191D 7%, #121212 70%, #040404 90%);
+    background-repeat: no-repeat !important;
+    height: fit-content !important;
     /*background-image: url(Images/network-dots.jpg);*/
+}
+
+div#content {
+    height: 100% !important;
 }
 
 @media (max-width: 620px){
     html, body {
         background-image: linear-gradient(180deg, #76B900 0%, #1A191D %, #121212 70%, #040404 90%);
+        height: -webkit-fill-available !important;
     }
 }
 
@@ -252,6 +259,21 @@ input,
     border-color: #76B900;
 }
 
+.blazor-context-menu,
+.blazor-context-menu--default,
+.userMenu .userMenu-item {
+    color: #BB86FC !important;
+    background-color: #040404 !important;
+    box-shadow: 0 10px 20px rgb(0 0 0 / 60%), 0 0 0 1px #BB86FC !important;
+}
+    .blazor-context-menu:hover,
+    .blazor-context-menu--default:hover,
+    .userMenu .userMenu-item:hover {
+        color: #BB86FC !important;
+        background-color: #010101 !important;
+        box-shadow: 0 10px 20px rgb(0 0 0 / 60%), 0 0 0 1px #BB86FC !important;
+    }
+
 .form-control {
     display: block;
     width: 100%;
@@ -323,6 +345,14 @@ input,
 .nav-pad {
     padding-left: 0.6em;
     padding-right: 0.6em;
+}
+
+.bottom-border {
+    border-bottom: 1px solid #76B900;
+}
+
+.bottom-pad {
+    padding-bottom: 0.4em;
 }
 
 #blazor-error-ui {

@@ -100,7 +100,7 @@ namespace CoreLogicLib.Comm
             smtpClient.Disconnect(true);
         }
 
-        public static bool SendEmail(string title, string msg, string[] emails)
+        public static bool SendEmail(string title, string msg, string[] emails, bool isHtml = false)
         {
             try
             {
@@ -112,10 +112,20 @@ namespace CoreLogicLib.Comm
                 }
 
                 mailMessage.Subject = title;
-                mailMessage.Body = new TextPart("plain")
+                if (isHtml)
                 {
-                    Text = msg
-                };
+                    mailMessage.Body = new TextPart("html")
+                    {
+                        Text = msg
+                    };
+                }
+                else
+                {
+                    mailMessage.Body = new TextPart("plain")
+                    {
+                        Text = msg
+                    };
+                }
 
                 using var smtpClient = new SmtpClient();
                 smtpClient.Connect(Constants.Config.SMTPUrl, Constants.Config.SMTPPort, MailKit.Security.SecureSocketOptions.Auto);

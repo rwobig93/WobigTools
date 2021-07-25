@@ -6,6 +6,9 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
 using MatBlazor;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using SharedLib.Dto;
 using SharedLib.General;
@@ -161,6 +164,51 @@ namespace SharedLib.Extensions
             {
                 return "https://lh4.googleusercontent.com/-pcIqLhnW714/AAAAAAAAAAI/AAAAAAAAAAA/EVtebngxjds/W96-H96/photo.jpg";
             }
+        }
+
+        public static string GetSingleLineFromList(this IList<string> stringList)
+        {
+            var returnString = "";
+            foreach (var entry in stringList)
+            {
+                if (string.IsNullOrWhiteSpace(returnString))
+                {
+                    returnString += entry;
+                }
+                else
+                {
+                    returnString += $", {entry}";
+                }
+            }
+            return returnString;
+        }
+    }
+
+    public class MyHttpContext
+    {
+        private static IHttpContextAccessor m_httpContextAccessor;
+
+        public static HttpContext Current => m_httpContextAccessor.HttpContext;
+
+        public static string AppBaseUrl => $"{Current.Request.Scheme}://{Current.Request.Host}{Current.Request.PathBase}";
+
+        internal static void Configure(IHttpContextAccessor contextAccessor)
+        {
+            m_httpContextAccessor = contextAccessor;
+        }
+    }
+
+    public static class HttpContextExtensions
+    {
+        public static void AddHttpContextAccessor(this IServiceCollection services)
+        {
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        }
+
+        public static IApplicationBuilder UseHttpContext(this IApplicationBuilder app)
+        {
+            MyHttpContext.Configure(app.ApplicationServices.GetRequiredService<IHttpContextAccessor>());
+            return app;
         }
     }
 }

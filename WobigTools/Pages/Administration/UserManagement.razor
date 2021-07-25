@@ -1,0 +1,164 @@
+﻿@using SharedLib.Extensions
+@using MatBlazor
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using BlazorContextMenu 
+
+@inject IMatToaster Toaster
+@inject UserManager<IdentityUser> _userManager
+@inject RoleManager<IdentityRole> _roleManager
+
+@attribute [Authorize(Roles = "Admin")]
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <h3 style="text-align: center">Current Users</h3>
+        <h5 style="text-align: center">Right click a user to edit</h5>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Email Confirmed</th>
+                    <th>MFA Enabled</th>
+                    <th>Roles</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in _userManager.Users.ToList())
+                {
+                    <ContextMenuTrigger WrapperTag="tr" MenuId="userMenu" Data="user">
+                        <td>@user.Email</td>
+                        <td>@user.EmailConfirmed</td>
+                        <td>@user.TwoFactorEnabled</td>
+                        <td>@_userManager.GetRolesAsync(user).Result.GetSingleLineFromList()</td>
+                    </ContextMenuTrigger>
+                }
+            </tbody>
+        </table>
+        <div class="bottom-border" />
+        <ContextMenu Id="userMenu" Context="menuContext">
+            <Item OnClick="@OpenRoleMenu">Edit Roles</Item>
+        </ContextMenu>
+        <MatDialog @bind-IsOpen="@roleMenuOpen">
+            <h3 class="horizontal-center" style="padding-top: 0.4em; padding-bottom: 0.2em;">Edit Roles for @editingUser.Email</h3>
+            <table class="table" width="95%">
+                <thead>
+                    <tr>
+                        <th class="horizontal-center">Roles Assigned</th>
+                        <th class="horizontal-center">Roles Available</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td width="48%">
+                            <table class="table">
+                                @foreach (var role in rolesWeHave)
+                                {
+                                    <tr><td><button class="btn btn-secondary" @onclick="(() => RemoveRole(role))">X</button> @role</td></tr>
+                                }
+                            </table>
+                        </td>
+                        <td width="48%">
+                            <table class="table">
+                                @foreach (var role in rolesWeWant)
+                                {
+                                    <tr><td><button class="btn btn-secondary" @onclick="(() => AddRole(role.Name))">+</button> @role.Name</td></tr>
+                                }
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="row" style="width: 100%;">
+                <div class="col horizontal-center">
+                    <button class="btn btn-warning" @onclick="CloseRoleMenu">Cancel</button>
+                    <button type="submit" class="btn btn-primary" @onclick="SaveUserRoles">Save Roles</button>
+                </div>
+            </div>
+            <br />
+        </MatDialog>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    private bool roleMenuOpen = false;
+    private IdentityUser editingUser = new IdentityUser("empty");
+    private List<string> rolesWeHave = new List<string>();
+    private List<IdentityRole> rolesWeWant = new List<IdentityRole>();
+
+    private async Task OpenRoleMenu(ItemClickEventArgs e)
+    {
+        editingUser = e.Data as IdentityUser;
+        rolesWeHave = _userManager.GetRolesAsync(editingUser).Result.ToList();
+        rolesWeWant = _roleManager.Roles.ToList();
+        rolesWeWant.RemoveAll(x => rolesWeHave.Contains(x.Name));
+        roleMenuOpen = true;
+        await Task.CompletedTask;
+    }
+
+    private async Task CloseRoleMenu()
+    {
+        roleMenuOpen = false;
+        editingUser = new IdentityUser("empty");
+        rolesWeHave = new List<string>();
+        rolesWeWant = new List<IdentityRole>();
+        StateHasChanged();
+        await Task.CompletedTask;
+    }
+
+    private async Task RemoveRole(string roleName)
+    {
+        rolesWeHave.Remove(roleName);
+        rolesWeWant.Add(_roleManager.FindByNameAsync(roleName).Result);
+        StateHasChanged();
+        await Task.CompletedTask;
+    }
+
+    private async Task AddRole(string roleName)
+    {
+        rolesWeHave.Add(roleName);
+        rolesWeWant.Remove(_roleManager.FindByNameAsync(roleName).Result);
+        StateHasChanged();
+        await Task.CompletedTask;
+    }
+
+    private async Task SaveUserRoles()
+    {
+        Log.Debug("Starting user role save for {EmailAddress}", editingUser.Email);
+        foreach (var role in rolesWeHave)
+        {
+            if (!await _userManager.IsInRoleAsync(editingUser, role))
+            {
+                Log.Debug("User isn't in the {RoleName} role, attempting to add", role);
+                await _userManager.AddToRoleAsync(editingUser, role);
+                Log.Information("Added the {RoleName} role to {EmailAddress}", editingUser.Email);
+            }
+            else
+            {
+                Log.Debug("User {EmailAddress} already is in the {RoleName} role", editingUser.Email, role);
+            }
+        }
+
+        foreach (var role in rolesWeWant)
+        {
+            if (await _userManager.IsInRoleAsync(editingUser, role.Name))
+            {
+                Log.Debug("User is in the {RoleName} role, attempting to remove", role.Name);
+                await _userManager.RemoveFromRoleAsync(editingUser, role.Name);
+                Log.Information("Removed {EmailAddress} from the {RoleName} role", editingUser.Email, role.Name);
+            }
+            else
+            {
+                Log.Debug("User {EmailAddress} already isn't in the {RoleName} role", editingUser.Email, role);
+            }
+        }
+        Toaster.CustomToast(editingUser.Email, "Updated roles successfully!", MatToastType.Success);
+
+        roleMenuOpen = false;
+        editingUser = new IdentityUser("empty");
+        rolesWeHave = new List<string>();
+        rolesWeWant = new List<IdentityRole>();
+        StateHasChanged();
+        await Task.CompletedTask;
+    }
+}

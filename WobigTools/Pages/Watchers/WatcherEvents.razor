@@ -1,9 +1,11 @@
 ﻿@page "/Watchers/Events"
 @using SharedLib.General
 
+@attribute [Authorize(Roles = "WatcherEvents")]
+
 <h3>WatcherEvents</h3>
 
-<div class="textarea">
+<div class="textarea" style="height: max-content;">
     @foreach (var line in Constants.WatcherEvents.Messages)
     {
         <div class="display-message">@line</div>

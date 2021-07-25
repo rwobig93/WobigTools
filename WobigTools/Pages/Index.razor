@@ -1,7 +1,5 @@
 ﻿@page "/"
-@using SharedLib.General
 @using MatBlazor
-@using SharedLib.Extensions
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Identity
 
@@ -9,157 +7,39 @@
 @inject UserManager<IdentityUser> _userManager
 @inject RoleManager<IdentityRole> _roleManager
 
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <WobigTools.Pages.Administration.DevConsole />
+        <br />
+        <WobigTools.Pages.Administration.UsersWithoutRoles />
+    </Authorized>
+</AuthorizeView>
 <AuthorizeView>
     <Authorized>
-        <h1 class="horizontal-center">Get back to work Rick!</h1>
-
-        <div class="horizontal-center">
-            <button class="btn btn-primary" @onclick="AddLog">Add Log</button>
-            <button class="btn btn-secondary" @onclick="ToastBarage">Toast Barage!</button>
-            <button class="btn btn-primary" @onclick="(() => TestButton())">Show Users</button>
-            <button class="btn btn-secondary" @onclick="(() => TestButton2())">Show Roles</button>
-        </div>
-        <div class="horizontal-center">
-            <button class="btn btn-danger" @onclick="(() => TestButton3())">Dangerous button</button>
-            <button class="btn btn-danger" @onclick="(() => TestButton4())">Undangerous button</button>
-            <button class="btn btn-danger" @onclick="(() => TestButton5())">Cool button</button>
-        </div>
+        @if (_userManager.GetRolesAsync(_userManager.GetUserAsync(context.User).Result).Result.Count <= 0)
+        {
+            <h2 class="horizontal-center">You don't currently have any access</h2>
+            <br />
+            <br />
+            <h4 class="horizontal-center">We'll grant you proper access shortly,</h4>
+            <h4 class="horizontal-center">if you are supposed to be here</h4>
+        }
+        else
+        {
+            <h2 class="horizontal-center">You have access!</h2>
+            <br />
+            <br />
+            <h4 class="horizontal-center">Feel free to use our tools (that you have access to)</h4>
+            <h4 class="horizontal-center">Use the navigation menu on the left or hamburger menu on mobile</h4>
+        }
         <br />
-        <br />
-        <h2 class="horizontal-center"> Log Output: </h2>
-        <div class="textarea">
-            @foreach (var line in Constants.DebugLog.Messages)
-            {
-                <div class="display-message">@line</div>
-            }
-        </div>
+        <div class="bottom-border" />
     </Authorized>
     <NotAuthorized>
-        <WobigTools.Pages.Auth.UnAuthorizedLogin />
+        <WobigTools.Pages.Auth.NotLoggedIn />
     </NotAuthorized>
 </AuthorizeView>
 
 @code {
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-        Constants.DebugLog.MessagesChanged += IndexAsyncHandler;
-    }
 
-    private void AddLog()
-    {
-        Constants.DebugLog.AddMessage($"Adding a test string here! {Guid.NewGuid()}");
-    }
-
-    private async void IndexAsyncHandler()
-    {
-        await InvokeAsync(() =>
-        {
-            StateHasChanged();
-        });
-    }
-
-    private async Task ToastBarage()
-    {
-        Toaster.CustomToast("Test Toast Yo!", "Test Toast Danger", MatToastType.Danger);
-        Toaster.CustomToast("Test Toast Yo!", "Test Toast Info", MatToastType.Info);
-        Toaster.CustomToast("Test Toast Yo!", "Test Toast Primary", MatToastType.Primary);
-        Toaster.CustomToast("Test Toast Yo!", "Test Toast Success", MatToastType.Success);
-        Toaster.CustomToast("Test Toast Yo!", "Test Toast Warning", MatToastType.Warning);
-        await Task.CompletedTask;
-    }
-
-    private async Task TestButton()
-    {
-        var users = _userManager.Users.ToList();
-        foreach (var user in users)
-        {
-            var displayMessage = $"User: {user.Email} | {user.Id} | Roles: ";
-            foreach (var role in await _userManager.GetRolesAsync(user))
-                displayMessage += $", {role}";
-            Constants.DebugLog.AddMessage(displayMessage);
-        }
-    }
-
-    private async Task TestButton2()
-    {
-        var roles = _roleManager.Roles.ToList();
-        foreach (var role in roles)
-        {
-            Constants.DebugLog.AddMessage($"Role: {role.Name} | {role.Id} | {role.NormalizedName}");
-        }
-    }
-
-    private async Task TestButton3()
-    {
-        var user = _userManager.Users.Where(x => x.Email == "rickwobig93@gmail.com").FirstOrDefault();
-        var adminRole = _roleManager.Roles.Where(x => x.Name == "Admin").FirstOrDefault();
-        if (adminRole == null)
-        {
-            await _roleManager.CreateAsync(new IdentityRole()
-            {
-                Name = "Admin"
-            });
-            adminRole = _roleManager.Roles.Where(x => x.Name == "Admin").FirstOrDefault();
-        }
-        var isAdmin = await _userManager.IsInRoleAsync(user, adminRole.Name);
-        if (!isAdmin)
-        {
-            await _userManager.AddToRoleAsync(user, adminRole.Name);
-            Toaster.CustomToast($"Success - {user.Email}", $"Added to role: {adminRole.Name}", MatToastType.Success);
-        }
-        else
-        {
-            Toaster.CustomToast($"Same - {user.Email}", $"Already in role: {adminRole.Name}", MatToastType.Info);
-        }
-    }
-
-    private async Task TestButton4()
-    {
-        var user = _userManager.Users.Where(x => x.Email == "rickwobig93@gmail.com").FirstOrDefault();
-        var adminRole = _roleManager.Roles.Where(x => x.Name == "Admin").FirstOrDefault();
-        if (adminRole == null)
-        {
-            await _roleManager.CreateAsync(new IdentityRole()
-            {
-                Name = "Admin"
-            });
-            adminRole = _roleManager.Roles.Where(x => x.Name == "Admin").FirstOrDefault();
-        }
-        var isAdmin = await _userManager.IsInRoleAsync(user, adminRole.Name);
-        if (isAdmin)
-        {
-            await _userManager.RemoveFromRoleAsync(user, adminRole.Name);
-            Toaster.CustomToast($"Success - {user.Email}", $"Removed from role: {adminRole.Name}", MatToastType.Success);
-        }
-        else
-        {
-            Toaster.CustomToast($"Same - {user.Email}", $"Already not in role: {adminRole.Name}", MatToastType.Info);
-        }
-    }
-
-    private async Task TestButton5()
-    {
-        var user = _userManager.Users.Where(x => x.Email == "rickwobig93@gmail.com").FirstOrDefault();
-        var testRole = _roleManager.Roles.Where(x => x.Name == "TestRole").FirstOrDefault();
-        if (testRole == null)
-        {
-            await _roleManager.CreateAsync(new IdentityRole()
-            {
-                Name = "TestRole"
-            });
-            testRole = _roleManager.Roles.Where(x => x.Name == "TestRole").FirstOrDefault();
-        }
-        var isTester = await _userManager.IsInRoleAsync(user, testRole.Name);
-        if (isTester)
-        {
-            await _userManager.RemoveFromRoleAsync(user, testRole.Name);
-            Toaster.CustomToast($"Success - {user.Email}", $"Removed from role: {testRole.Name}", MatToastType.Success);
-        }
-        else
-        {
-            await _userManager.AddToRoleAsync(user, testRole.Name);
-            Toaster.CustomToast($"Success - {user.Email}", $"Added to role: {testRole.Name}", MatToastType.Success);
-        }
-    }
 }

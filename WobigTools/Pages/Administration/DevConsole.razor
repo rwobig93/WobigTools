@@ -1,0 +1,176 @@
+﻿@using SharedLib.General
+@using MatBlazor
+@using SharedLib.Extensions
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+
+@inject IMatToaster Toaster
+@inject UserManager<IdentityUser> _userManager
+@inject RoleManager<IdentityRole> _roleManager
+
+@attribute [Authorize(Roles = "Developer")]
+
+<AuthorizeView Roles="Developer">
+    <Authorized>
+        <h1 class="horizontal-center">Get back to work Rick!</h1>
+        @if (showDevConsole)
+        {
+            <div class="horizontal-center bottom-pad"><button class="btn btn-primary" @onclick="(() => showDevConsole = !showDevConsole)">Hide Dev Console</button></div>
+        }
+        else
+        {
+            <div class="horizontal-center bottom-pad"><button class="btn btn-primary" @onclick="(() => showDevConsole = !showDevConsole)">Show Dev Console</button></div>
+        }
+        <br />
+        @if (showDevConsole)
+        {
+            <div class="horizontal-center bottom-pad">
+                <button class="btn btn-primary" @onclick="AddLog">Add Log</button>
+                <button class="btn btn-secondary" @onclick="ToastBarage">Toast Barage!</button>
+                <button class="btn btn-primary" @onclick="(() => TestButton())">Show Users</button>
+                <button class="btn btn-secondary" @onclick="(() => TestButton2())">Show Roles</button>
+            </div>
+            <div class="horizontal-center bottom-pad">
+                <button class="btn btn-danger" @onclick="(() => TestButton3())">Dangerous button</button>
+                <button class="btn btn-danger" @onclick="(() => TestButton4())">Undangerous button</button>
+                <button class="btn btn-danger" @onclick="(() => TestButton5())">Cool button</button>
+            </div>
+            <br />
+            <h2 class="horizontal-center"> Log Output: </h2>
+            <div class="textarea horizontal-center">
+                @foreach (var line in Constants.DebugLog.Messages)
+                {
+                    <div class="display-message">@line</div>
+                }
+            </div>
+            <br />
+        }
+        <div class="bottom-border" />
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    private bool showDevConsole = false;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Constants.DebugLog.MessagesChanged += IndexAsyncHandler;
+        if (!Constants.HadFirstWebRequest)
+        {
+            CoreLogicLib.Standard.Core.InitializeWebTasks(MyHttpContext.AppBaseUrl);
+            Constants.HadFirstWebRequest = true;
+        }
+    }
+
+    private void AddLog()
+    {
+        Constants.DebugLog.AddMessage($"Adding a test string here! {Guid.NewGuid()}");
+    }
+
+    private async void IndexAsyncHandler()
+    {
+        await InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
+    }
+
+    private async Task ToastBarage()
+    {
+        Toaster.CustomToast("Test Toast Yo!", "Test Toast Danger", MatToastType.Danger);
+        Toaster.CustomToast("Test Toast Yo!", "Test Toast Info", MatToastType.Info);
+        Toaster.CustomToast("Test Toast Yo!", "Test Toast Primary", MatToastType.Primary);
+        Toaster.CustomToast("Test Toast Yo!", "Test Toast Success", MatToastType.Success);
+        Toaster.CustomToast("Test Toast Yo!", "Test Toast Warning", MatToastType.Warning);
+        await Task.CompletedTask;
+    }
+
+    private async Task TestButton()
+    {
+        var users = _userManager.Users.ToList();
+        foreach (var user in users)
+        {
+            var displayMessage = $"User: {user.Email} | {user.Id} | Roles: ";
+            foreach (var role in await _userManager.GetRolesAsync(user))
+                displayMessage += $", {role}";
+            Constants.DebugLog.AddMessage(displayMessage);
+        }
+    }
+
+    private async Task TestButton2()
+    {
+        var roles = _roleManager.Roles.ToList();
+        foreach (var role in roles)
+        {
+            Constants.DebugLog.AddMessage($"Role: {role.Name} | {role.Id} | {role.NormalizedName}");
+        }
+    }
+
+    private async Task TestButton3()
+    {
+        var user = _userManager.Users.Where(x => x.Email == "rickwobig93@gmail.com").FirstOrDefault();
+        var adminRole = _roleManager.Roles.Where(x => x.Name == "Admin").FirstOrDefault();
+        if (adminRole == null)
+        {
+            await _roleManager.CreateAsync(new IdentityRole()
+            {
+                Name = "Admin"
+            });
+            adminRole = _roleManager.Roles.Where(x => x.Name == "Admin").FirstOrDefault();
+        }
+        var isAdmin = await _userManager.IsInRoleAsync(user, adminRole.Name);
+        if (!isAdmin)
+        {
+            await _userManager.AddToRoleAsync(user, adminRole.Name);
+            Toaster.CustomToast($"Success - {user.Email}", $"Added to role: {adminRole.Name}", MatToastType.Success);
+        }
+        else
+        {
+            Toaster.CustomToast($"Same - {user.Email}", $"Already in role: {adminRole.Name}", MatToastType.Info);
+        }
+    }
+
+    private async Task TestButton4()
+    {
+        var user = _userManager.Users.Where(x => x.Email == "rickwobig93@gmail.com").FirstOrDefault();
+        var adminRole = _roleManager.Roles.Where(x => x.Name == "Admin").FirstOrDefault();
+        if (adminRole == null)
+        {
+            await _roleManager.CreateAsync(new IdentityRole()
+            {
+                Name = "Admin"
+            });
+            adminRole = _roleManager.Roles.Where(x => x.Name == "Admin").FirstOrDefault();
+        }
+        var isAdmin = await _userManager.IsInRoleAsync(user, adminRole.Name);
+        if (isAdmin)
+        {
+            await _userManager.RemoveFromRoleAsync(user, adminRole.Name);
+            Toaster.CustomToast($"Success - {user.Email}", $"Removed from role: {adminRole.Name}", MatToastType.Success);
+        }
+        else
+        {
+            Toaster.CustomToast($"Same - {user.Email}", $"Already not in role: {adminRole.Name}", MatToastType.Info);
+        }
+    }
+
+    private async Task TestButton5()
+    {
+        var user = _userManager.Users.Where(x => x.Email == "rickwobig93@gmail.com").FirstOrDefault();
+
+        var testRole = _roleManager.Roles.Where(x => x.Name == "TestRole").FirstOrDefault();
+
+        var isTester = await _userManager.IsInRoleAsync(user, testRole.Name);
+        if (isTester)
+        {
+            await _userManager.RemoveFromRoleAsync(user, testRole.Name);
+            Toaster.CustomToast(user.Email, $"Removed from role: {testRole.Name}", MatToastType.Success);
+        }
+        else
+        {
+            await _userManager.AddToRoleAsync(user, testRole.Name);
+            Toaster.CustomToast(user.Email, $"Added to role: {testRole.Name}", MatToastType.Success);
+        }
+    }
+}

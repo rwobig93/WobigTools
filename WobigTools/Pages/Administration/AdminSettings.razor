@@ -1,75 +1,19 @@
 ﻿@page "/Administration/Settings"
-@using System.ComponentModel.DataAnnotations;
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
 
 @attribute [Authorize]
 
 @inject IMatToaster Toaster
+@inject UserManager<IdentityUser> _userManager
+@inject RoleManager<IdentityRole> _roleManager
 
 <AuthorizeView Roles="Admin">
     <Authorized>
-        <h3>SMTP Settings for Email</h3>
-        <EditForm Model="@settingsSMTP" OnValidSubmit="@SetSMTPSettings">
-            <ChildContent Context="editContext">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
-
-                <table class="table">
-                    <tbody>
-                        <tr>
-                            <td>
-                                <MatTextField Label="From Email Address" @bind-Value="settingsSMTP.EmailFrom" TValue="string" Required="true"></MatTextField>
-                                <ValidationMessage For="@(() => settingsSMTP.EmailFrom)" />
-                            </td>
-                            <td>
-                                <MatTextField Label="From Name" @bind-Value="settingsSMTP.EmailName" TValue="string" Required="true"></MatTextField>
-                                <ValidationMessage For="@(() => settingsSMTP.EmailName)" />
-                            </td>
-                            <td>
-                                <MatTextField Label="Login Username" @bind-Value="settingsSMTP.Username" TValue="string" Required="true"></MatTextField>
-                                <ValidationMessage For="@(() => settingsSMTP.Username)" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <MatTextField Label="SMTP Host URL" @bind-Value="settingsSMTP.Host" TValue="string" Required="true"></MatTextField>
-                                <ValidationMessage For="@(() => settingsSMTP.Host)" />
-                            </td>
-                            <td>
-                                <MatTextField Label="SMTP Port" @bind-Value="settingsSMTP.Port" TValue="int" Required="true"></MatTextField>
-                                <ValidationMessage For="@(() => settingsSMTP.Port)" />
-                            </td>
-                            <td>
-                                <MatTextField Label="Login Password" @bind-Value="settingsSMTP.Password" TValue="string" Required="true" Type="password"></MatTextField>
-                                <ValidationMessage For="@(() => settingsSMTP.Password)" />
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </ChildContent>
-        </EditForm>
+        <SMTPSettings />
         <br />
-        <h4>Test SMTP</h4>
-        <table class="table">
-            <tbody>
-                <tr>
-                    <td width="15%" align="center" valign="middle">Send To Address:</td>
-                    <td width="80%">
-                        <MatTextField Label="Send To Address" Style="width: 50%" PlaceHolder="Send To Address" Id="sendToAddress" @bind-Value="smtpTestAddress" TValue="string"></MatTextField>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <button type="button" style="align-content: center" class="btn btn-secondary" @onclick="TestSMTP">Test SMTP</button>
-    </Authorized>
-    <NotAuthorized>
-        <WobigTools.Pages.Auth.Unauthorized />
-    </NotAuthorized>
-</AuthorizeView>
-<AuthorizeView Roles="TestRole">
-    <Authorized>
-        <h2>You are in the test role!</h2>
+        <UserManagement />
     </Authorized>
     <NotAuthorized>
         <WobigTools.Pages.Auth.Unauthorized />
@@ -77,57 +21,10 @@
 </AuthorizeView>
 <AuthorizeView>
     <NotAuthorized>
-        <WobigTools.Pages.Auth.UnAuthorizedLogin />
+        <WobigTools.Pages.Auth.NotLoggedIn />
     </NotAuthorized>
 </AuthorizeView>
 
 @code {
-    private DisplaySettingsSMTPModel settingsSMTP = new DisplaySettingsSMTPModel();
 
-    [Required]
-    [EmailAddress(ErrorMessage = "Please enter a valid email address")]
-    public string smtpTestAddress = string.Empty;
-
-    protected override async Task OnInitializedAsync()
-    {
-        if (!string.IsNullOrWhiteSpace(Constants.Config.SMTPUrl) &&
-            Constants.Config.SMTPPort != 0)
-        {
-            settingsSMTP.EmailFrom = Constants.Config.SMTPEmailFrom;
-            settingsSMTP.EmailName = Constants.Config.SMTPEmailName;
-            settingsSMTP.Host = Constants.Config.SMTPUrl;
-            settingsSMTP.Username = Constants.Config.SMTPUsername;
-            settingsSMTP.Password = Constants.Config.SMTPPassword;
-            settingsSMTP.Port = Constants.Config.SMTPPort;
-            StateHasChanged();
-        }
-    }
-
-    private async Task SetSMTPSettings()
-    {
-        Constants.Config.SMTPEmailFrom = settingsSMTP.EmailFrom;
-        Constants.Config.SMTPEmailName = settingsSMTP.EmailName;
-        Constants.Config.SMTPUrl = settingsSMTP.Host;
-        Constants.Config.SMTPUsername = settingsSMTP.Username;
-        Constants.Config.SMTPPassword = settingsSMTP.Password;
-        Constants.Config.SMTPPort = settingsSMTP.Port;
-        Config.Save();
-        Toaster.CustomToast("SMTP Settings Saved Successfully", "Success", MatToastType.Success);
-    }
-
-    private async Task TestSMTP()
-    {
-        if (smtpTestAddress.IsValidEmail())
-        {
-            var sendSuccess = CoreLogicLib.Comm.Communication.SendEmail("Test Email", "This is a test email, if your received it then your SMTP settings are valid and working!", new string[] { smtpTestAddress });
-            if (sendSuccess)
-                Toaster.CustomToast("Email send was successful!", "Success", MatToastType.Success);
-            else
-                Toaster.CustomToast("SMTP Settings Invalid", "Failure", MatToastType.Danger);
-        }
-        else
-        {
-            Toaster.CustomToast("Invalid Email Address", "Warning", MatToastType.Warning);
-        }
-    }
 }

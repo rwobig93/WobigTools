@@ -8,6 +8,8 @@ using SharedLib.Extensions;
 using CoreLogicLib.Auto;
 using Microsoft.Extensions.Configuration;
 using CoreLogicLib.Auth;
+using System.Threading.Tasks;
+using System.Net.Http;
 
 namespace CoreLogicLib.Standard
 {
@@ -48,7 +50,7 @@ namespace CoreLogicLib.Standard
 
         public static void SetupAuth()
         {
-            Operations.InitializeAuth();
+            //Operations.InitializeAuth();
         }
 
         public static void SaveEverything()
@@ -141,6 +143,12 @@ namespace CoreLogicLib.Standard
                 Constants.LogLevelCloud.MinimumLevel = logLevel;
             }
             Log.Information("Cloud Logging Set to: {LogLevel}", logLevel);
+        }
+
+        public static void InitializeWebTasks(string baseUrl)
+        {
+            HttpClient client = new HttpClient();
+            client.SendAsync(new HttpRequestMessage(HttpMethod.Get, $"{baseUrl}/operations/validate-defaults"));
         }
 
         public static void InitializeApp()

@@ -18,6 +18,8 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using CoreLogicLib.Auth;
 using Microsoft.AspNetCore.Authorization;
+using SharedLib.Extensions;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace WobigTools
 {
@@ -40,6 +42,7 @@ namespace WobigTools
             services.AddSingleton<WeatherForecastService>();
             // Server startup/close events
             services.AddHostedService<LifetimeEventsHostedService>();
+            services.AddTransient<IEmailSender, EmailService>();
             // Data access
             services.AddTransient<ISqlDA, MySqlDA>();
             services.AddTransient<IPeopleData, PeopleData>();
@@ -56,6 +59,8 @@ namespace WobigTools
                 config.MaximumOpacity = 95;
                 config.VisibleStateDuration = 5000;
             });
+            // Extra components
+            services.AddBlazorContextMenu();
             // Authentication & Authorization
             services.AddDefaultIdentity<IdentityUser>()
                 .AddRoles<IdentityRole>()
@@ -64,15 +69,6 @@ namespace WobigTools
             services.AddTransient<RoleManager<IdentityRole>>();
             services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
             services.AddSingleton<IAuthorizationHandler, IsTheOnePolicyHandler>();
-            // Oauth providers
-            //
-            // "Cookies"
-            //.AddCookie(opt =>
-            // {
-            //     opt.Cookie.Name = "GoogleAuth";
-            //     //opt.LoginPath = "/oauth/google";
-            //     opt.CookieManager = new ChunkingCookieManager();
-            // })
             services.AddAuthentication()
                 .AddGoogle(opt =>
                 {
@@ -113,6 +109,7 @@ namespace WobigTools
 
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseHttpContext();
 
             app.UseEndpoints(endpoints =>
             {
