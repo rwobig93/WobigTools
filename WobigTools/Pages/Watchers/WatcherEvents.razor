@@ -3,14 +3,41 @@
 
 @attribute [Authorize(Roles = "WatcherEvents")]
 
-<h3>WatcherEvents</h3>
-
-<div class="textarea" style="height: max-content;">
-    @foreach (var line in Constants.WatcherEvents.Messages)
-    {
-        <div class="display-message">@line</div>
-    }
-</div>
+<AuthorizeView Roles="WatcherEvents, Admin">
+    <Authorized>
+        <h3 class="horizontal-center">Watcher Events</h3>
+        <div class="textarea" style="height: max-content;">
+            @foreach (var line in Constants.WatcherEvents.Messages)
+            {
+                <div class="display-message">@line</div>
+            }
+        </div>
+        <br />
+        <div class="bottom-border" />
+    </Authorized>
+    <NotAuthorized>
+        <WobigTools.Pages.Auth.Unauthorized />
+    </NotAuthorized>
+</AuthorizeView>
+<br />
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <h3 class="horizontal-center">Watcher Audit Logs</h3>
+        <div class="textarea" style="height: max-content;">
+            @foreach (var line in Constants.WatcherAuditLogs.Messages)
+            {
+                <div class="display-message">@line</div>
+            }
+        </div>
+        <br />
+        <div class="bottom-border" />
+    </Authorized>
+</AuthorizeView>
+<AuthorizeView>
+    <NotAuthorized>
+        <WobigTools.Pages.Auth.NotLoggedIn />
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     protected override void OnInitialized()

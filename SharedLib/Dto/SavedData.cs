@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security.Claims;
 using Newtonsoft.Json;
 using Serilog;
-using SharedLib.Auth;
 using SharedLib.General;
 using SharedLib.IO;
 
@@ -16,15 +14,6 @@ namespace SharedLib.Dto
     {
         public List<TrackedProduct> TrackedProducts { get; set; } = new List<TrackedProduct>();
         public List<Alert> Alerts { get; set; } = new List<Alert>();
-        public List<AuthAccess> Accesses { get; set; } = new List<AuthAccess>()
-        {
-            new AuthAccess() { Name = "GeneralReadAccess", AccessLevel = AccessType.Read, AccessDomain = "Global" }
-        };
-        public List<AuthRole> AccessRoles { get; set; } = new List<AuthRole>()
-        {
-            new AuthRole() { Name = "Everyone" }
-        };
-        public List<AuthUser> UserProfiles { get; set; } = new List<AuthUser>();
 
         public static StatusReturn Load()
         {

@@ -62,7 +62,20 @@ namespace WobigTools
             // Extra components
             services.AddBlazorContextMenu();
             // Authentication & Authorization
-            services.AddDefaultIdentity<IdentityUser>()
+            services.AddDefaultIdentity<IdentityUser>(opt => 
+                {
+                    opt.User.RequireUniqueEmail = true;
+                    opt.SignIn.RequireConfirmedAccount = true;
+                    opt.SignIn.RequireConfirmedEmail = true;
+                    opt.Password.RequiredLength = 12;
+                    opt.Password.RequireNonAlphanumeric = true;
+                    opt.Password.RequireUppercase = true;
+                    opt.Password.RequireLowercase = true;
+                    opt.Password.RequireDigit = true;
+                    opt.Lockout.DefaultLockoutTimeSpan = System.TimeSpan.FromMinutes(15);
+                    opt.Lockout.AllowedForNewUsers = true;
+                    opt.Lockout.MaxFailedAccessAttempts = 3;
+                })
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>();
             services.AddTransient<UserManager<IdentityUser>>();

@@ -22,6 +22,7 @@ namespace SharedLib.General
         public static List<string> Notifications { get; set; } = new List<string>(5);
         public static MessageHandler DebugLog { get; set; } = new MessageHandler();
         public static MessageHandler WatcherEvents { get; set; } = new MessageHandler(messageCountMax: 100);
+        public static MessageHandler WatcherAuditLogs { get; set; } = new MessageHandler(messageCountMax: 200);
         // Bools
         public static bool CloseApp { get; set; } = false;
         public static bool DebugMode { get; set; } = false;
