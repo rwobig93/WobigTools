@@ -2,9 +2,10 @@
 @using MatBlazor
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Identity
-@using BlazorContextMenu 
+@using BlazorContextMenu
 
 @inject IMatToaster Toaster
+@inject IMatDialogService MatDialogService
 @inject UserManager<IdentityUser> _userManager
 @inject RoleManager<IdentityRole> _roleManager
 
@@ -20,24 +21,32 @@
                     <th>Email</th>
                     <th>Email Confirmed</th>
                     <th>MFA Enabled</th>
+                    <th>Lockout</th>
                     <th>Roles</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var user in _userManager.Users.ToList())
                 {
-                    <ContextMenuTrigger WrapperTag="tr" MenuId="userMenu" Data="user">
-                        <td>@user.Email</td>
-                        <td>@user.EmailConfirmed</td>
-                        <td>@user.TwoFactorEnabled</td>
-                        <td>@_userManager.GetRolesAsync(user).Result.GetSingleLineFromList()</td>
-                    </ContextMenuTrigger>
+                    if (user.UserName != "superperson")
+                    {
+                        <ContextMenuTrigger WrapperTag="tr" MenuId="userMenu" Data="user">
+                            <td>@user.Email</td>
+                            <td>@user.EmailConfirmed</td>
+                            <td>@user.TwoFactorEnabled</td>
+                            <td>@user.AccessFailedCount</td>
+                            <td>@_userManager.GetRolesAsync(user).Result.GetSingleLineFromList()</td>
+                        </ContextMenuTrigger>
+                    }
                 }
             </tbody>
         </table>
         <div class="bottom-border" />
         <ContextMenu Id="userMenu" Context="menuContext">
             <Item OnClick="@OpenRoleMenu">Edit Roles</Item>
+            <Item OnClick="((e) => UnlockAccount(e, context))">Unlock Account</Item>
+            <Item OnClick="((e) => ResetPassword(e, context))">Reset Password</Item>
+            <Item OnClick="((e) => DeleteUser(e, context))">Delete User</Item>
         </ContextMenu>
         <MatDialog @bind-IsOpen="@roleMenuOpen">
             <h3 class="horizontal-center" style="padding-top: 0.4em; padding-bottom: 0.2em;">Edit Roles for @editingUser.Email</h3>
@@ -72,7 +81,7 @@
             <div class="row" style="width: 100%;">
                 <div class="col horizontal-center">
                     <button class="btn btn-warning" @onclick="CloseRoleMenu">Cancel</button>
-                    <button type="submit" class="btn btn-primary" @onclick="SaveUserRoles">Save Roles</button>
+                    <button type="submit" class="btn btn-primary" @onclick="(() => SaveUserRoles(context))">Save Roles</button>
                 </div>
             </div>
             <br />
@@ -122,20 +131,20 @@
         await Task.CompletedTask;
     }
 
-    private async Task SaveUserRoles()
+    private async Task SaveUserRoles(AuthenticationState authState)
     {
-        Log.Debug("Starting user role save for {EmailAddress}", editingUser.Email);
+        Log.Debug("Starting user role save for {EmailAddress} | ActionBy: {ActionUser}", editingUser.Email, authState.User.Identity.Name);
         foreach (var role in rolesWeHave)
         {
             if (!await _userManager.IsInRoleAsync(editingUser, role))
             {
-                Log.Debug("User isn't in the {RoleName} role, attempting to add", role);
+                Log.Debug("User isn't in the {RoleName} role, attempting to add | ActionBy: {ActionUser}", role, authState.User.Identity.Name);
                 await _userManager.AddToRoleAsync(editingUser, role);
-                Log.Information("Added the {RoleName} role to {EmailAddress}", editingUser.Email);
+                Log.Information("Added the {RoleName} role to {EmailAddress} | ActionBy: {ActionUser}", editingUser.Email, authState.User.Identity.Name);
             }
             else
             {
-                Log.Debug("User {EmailAddress} already is in the {RoleName} role", editingUser.Email, role);
+                Log.Debug("User {EmailAddress} already is in the {RoleName} role | ActionBy: {ActionUser}", editingUser.Email, role, authState.User.Identity.Name);
             }
         }
 
@@ -143,13 +152,13 @@
         {
             if (await _userManager.IsInRoleAsync(editingUser, role.Name))
             {
-                Log.Debug("User is in the {RoleName} role, attempting to remove", role.Name);
+                Log.Debug("User is in the {RoleName} role, attempting to remove | ActionBy: {ActionUser}", role.Name, authState.User.Identity.Name);
                 await _userManager.RemoveFromRoleAsync(editingUser, role.Name);
-                Log.Information("Removed {EmailAddress} from the {RoleName} role", editingUser.Email, role.Name);
+                Log.Information("Removed {EmailAddress} from the {RoleName} role | ActionBy: {ActionUser}", editingUser.Email, role.Name, authState.User.Identity.Name);
             }
             else
             {
-                Log.Debug("User {EmailAddress} already isn't in the {RoleName} role", editingUser.Email, role);
+                Log.Debug("User {EmailAddress} already isn't in the {RoleName} role | ActionBy: {ActionUser}", editingUser.Email, role, authState.User.Identity.Name);
             }
         }
         Toaster.CustomToast(editingUser.Email, "Updated roles successfully!", MatToastType.Success);
@@ -160,5 +169,44 @@
         rolesWeWant = new List<IdentityRole>();
         StateHasChanged();
         await Task.CompletedTask;
+    }
+
+    private async Task DeleteUser(ItemClickEventArgs e, AuthenticationState authState)
+    {
+        editingUser = e.Data as IdentityUser;
+        var deleteUser = await MatDialogService.ConfirmAsync($"Delete user {editingUser.Email}?");
+        if (deleteUser)
+        {
+            Log.Information("Deleting user: {EmailAddress} | ActionBy: {ActionUser}", editingUser.Email, authState.User.Identity.Name);
+            await _userManager.DeleteAsync(editingUser);
+            Log.Information("User deleted successfully | ActionBy: {ActionUser}", authState.User.Identity.Name);
+            Toaster.CustomToast("Success", "User was deleted successfully!", MatToastType.Success);
+        }
+        editingUser = new IdentityUser("empty");
+    }
+
+    private async Task UnlockAccount(ItemClickEventArgs e, AuthenticationState authState)
+    {
+        editingUser = e.Data as IdentityUser;
+        Log.Information("Unlocking user: {EmailAddress} | ActionBy: {ActionUser}", editingUser.Email, authState.User.Identity.Name);
+        await _userManager.ResetAccessFailedCountAsync(editingUser);
+        Log.Information("Account unlocked: {EmailAddress} | ActionBy: {ActionUser}", editingUser.Email, authState.User.Identity.Name);
+        Toaster.CustomToast(editingUser.Email, "Account unlocked successfully!", MatToastType.Success);
+        editingUser = new IdentityUser("empty");
+    }
+
+    private async Task ResetPassword(ItemClickEventArgs e, AuthenticationState authState)
+    {
+        editingUser = e.Data as IdentityUser;
+        var newPassword = await MatDialogService.PromptAsync("Enter a new password:");
+        if (!string.IsNullOrWhiteSpace(newPassword))
+        {
+            Log.Debug("Resetting password for user: {EmailAddress} | ActionBy: {ActionUser}", authState.User.Identity.Name);
+            var passToken = await _userManager.GeneratePasswordResetTokenAsync(editingUser);
+            await _userManager.ResetPasswordAsync(editingUser, passToken, newPassword);
+            Log.Information("Password reset for user: {EmailAddress} | ActionBy: {ActionUser}", authState.User.Identity.Name);
+            Toaster.CustomToast(editingUser.Email, "Password reset successfully!", MatToastType.Success);
+        }
+        editingUser = new IdentityUser("empty");
     }
 }

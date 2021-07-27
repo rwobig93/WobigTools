@@ -39,13 +39,11 @@ namespace WobigTools
             // Defaults
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
             // Server startup/close events
             services.AddHostedService<LifetimeEventsHostedService>();
             services.AddTransient<IEmailSender, EmailService>();
             // Data access
             services.AddTransient<ISqlDA, MySqlDA>();
-            services.AddTransient<IPeopleData, PeopleData>();
             services.AddDbContext<AppDbContext>(opt =>
                 opt.UseSqlite("DataSource=app.db"));
             // MatBlazor components
@@ -80,6 +78,7 @@ namespace WobigTools
                 .AddEntityFrameworkStores<AppDbContext>();
             services.AddTransient<UserManager<IdentityUser>>();
             services.AddTransient<RoleManager<IdentityRole>>();
+            services.AddTransient<SignInManager<IdentityUser>>();
             services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
             services.AddSingleton<IAuthorizationHandler, IsTheOnePolicyHandler>();
             services.AddAuthentication()

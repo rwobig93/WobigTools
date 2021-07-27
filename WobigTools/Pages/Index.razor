@@ -41,5 +41,13 @@
 </AuthorizeView>
 
 @code {
-
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (!Constants.HadFirstWebRequest)
+        {
+            CoreLogicLib.Standard.Core.InitializeWebTasks(MyHttpContext.AppBaseUrl);
+            Constants.HadFirstWebRequest = true;
+        }
+    }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Threading.Tasks;
 using MailKit.Net.Smtp;
 using MimeKit;
 using Newtonsoft.Json;
@@ -132,6 +133,47 @@ namespace CoreLogicLib.Comm
                 smtpClient.Authenticate(Constants.Config.SMTPUsername, Constants.Config.SMTPPassword);
                 smtpClient.Send(mailMessage);
                 smtpClient.Disconnect(true);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failure occured attempting to send email");
+                return false;
+            }
+        }
+
+        public static async Task<bool> SendEmailAsync(string title, string msg, string[] emails, bool isHtml = false)
+        {
+            try
+            {
+                var mailMessage = new MimeMessage();
+                mailMessage.From.Add(new MailboxAddress(Constants.Config.SMTPEmailName, Constants.Config.SMTPEmailFrom));
+                foreach (var address in emails)
+                {
+                    mailMessage.Bcc.Add(new MailboxAddress(address.ToString()));
+                }
+
+                mailMessage.Subject = title;
+                if (isHtml)
+                {
+                    mailMessage.Body = new TextPart("html")
+                    {
+                        Text = msg
+                    };
+                }
+                else
+                {
+                    mailMessage.Body = new TextPart("plain")
+                    {
+                        Text = msg
+                    };
+                }
+
+                using var smtpClient = new SmtpClient();
+                await smtpClient.ConnectAsync(Constants.Config.SMTPUrl, Constants.Config.SMTPPort, MailKit.Security.SecureSocketOptions.Auto);
+                await smtpClient.AuthenticateAsync(Constants.Config.SMTPUsername, Constants.Config.SMTPPassword);
+                await smtpClient.SendAsync(mailMessage);
+                await smtpClient.DisconnectAsync(true);
                 return true;
             }
             catch (Exception ex)

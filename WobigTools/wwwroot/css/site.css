@@ -190,14 +190,23 @@ input,
 }
 
 .mdc-dialog .mdc-dialog__surface {
+    color: #BB86FC !important;
     background-color: #121212 !important;
     max-width: none !important;
     width: 174% !important;
     border: 1px solid #76B900;
 }
 
+.mdc-dialog .mdc-dialog__content {
+    color: #BB86FC !important;
+    background-color: #121212 !important;
+    max-width: none !important;
+    border: 1px solid #76B900;
+}
+
 @media (max-width: 897px) {
-    .mdc-dialog .mdc-dialog__surface {
+    .mdc-dialog .mdc-dialog__surface,
+    .mdc-dialog .mdc-dialog__content {
         max-width: 100% !important;
     }
 }
@@ -261,16 +270,18 @@ input,
 
 .blazor-context-menu,
 .blazor-context-menu--default,
-.userMenu .userMenu-item {
+.userMenu .userMenu-item,
+.blazor-context-menu:hover,
+.blazor-context-menu--default:hover,
+.userMenu .userMenu-item:hover {
     color: #BB86FC !important;
     background-color: #040404 !important;
     box-shadow: 0 10px 20px rgb(0 0 0 / 60%), 0 0 0 1px #BB86FC !important;
 }
-    .blazor-context-menu:hover,
-    .blazor-context-menu--default:hover,
-    .userMenu .userMenu-item:hover {
-        color: #BB86FC !important;
-        background-color: #010101 !important;
+
+    .blazor-context-menu__item--default:hover {
+        color: #76B900 !important;
+        background-color: #121212 !important;
         box-shadow: 0 10px 20px rgb(0 0 0 / 60%), 0 0 0 1px #BB86FC !important;
     }
 

@@ -9,17 +9,19 @@ namespace WobigTools.API.Auth
     [ApiController]
     public class OperationsController : ControllerBase
     {
+        private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
 
-        public OperationsController(RoleManager<IdentityRole> roleManager)
+        public OperationsController(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
+            _userManager = userManager;
             _roleManager = roleManager;
         }
 
         [HttpGet("validate-defaults")]
-        public async Task ValidateDefaultRoles()
+        public async Task ValidateDefaultRolesAndUsers()
         {
-            Log.Debug("Starting default role validation");
+            Log.Debug("Starting default role and user validation");
             
             var defaultRoles = new string[]
             {
@@ -28,6 +30,11 @@ namespace WobigTools.API.Auth
                 "WatcherEvents",
                 "WatcherList",
                 "Developer"
+            };
+
+            var defaultUsers = new string[]
+            {
+                "superperson@wobigtools.com"
             };
 
             foreach (var role in defaultRoles)
@@ -43,7 +50,25 @@ namespace WobigTools.API.Auth
                 }
             }
 
-            Log.Debug("Finished default role validation");
+            foreach (var user in defaultUsers)
+            {
+                if (await _userManager.FindByNameAsync(user) == null)
+                {
+                    await _userManager.CreateAsync(new IdentityUser()
+                    {
+                        UserName = user,
+                        Email = user,
+                        EmailConfirmed = true
+                    }, "superpassword");
+                    Log.Information("Created missing default user: {EmailAddress}", user);
+                }
+                else
+                {
+                    Log.Debug("Default user already exists: {EmailAddress}", user);
+                }
+            }
+
+            Log.Debug("Finished default role and user validation");
         }
     }
 }
