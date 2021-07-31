@@ -6,6 +6,8 @@
 @inject IMatToaster Toaster
 @inject UserManager<IdentityUser> _userManager
 @inject RoleManager<IdentityRole> _roleManager
+@inject AuthenticationStateProvider AuthProvider
+@inject AppDbContext db
 
 <AuthorizeView Roles="Admin">
     <Authorized>
@@ -18,30 +20,61 @@
     <Authorized>
         @if (_userManager.GetRolesAsync(_userManager.GetUserAsync(context.User).Result).Result.Count <= 0)
         {
+        <div class="invalid-box">
             <h2 class="horizontal-center">You don't currently have any access</h2>
             <br />
             <br />
             <h4 class="horizontal-center">We'll grant you proper access shortly,</h4>
             <h4 class="horizontal-center">if you are supposed to be here</h4>
+        </div>
         }
         else
         {
-            <table class="table-invisible" width="95%">
-                <tbody>
+            <table class="table-invisible" width="98%">
+                <thead>
                     <tr>
-                        <td width="98%">
-                            <MatPaper Elevation="6" Rounded="true">@userCount Users</MatPaper>
+                        <th aria-hidden="true"></th>
+                        <th aria-hidden="true"></th>
+                        <th aria-hidden="true"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="horizontal-center">
+                        <td class="horizontal-center">
+                            <MatRipple>
+                                <MatPaper Elevation="6" Rounded="true">@userCount Users</MatPaper>
+                            </MatRipple>
                         </td>
-                        <td width="98%">
-                            <MatPaper Elevation="6" Rounded="true">@watcherCount Watchers</MatPaper>
+                        <td class="horizontal-center">
+                            <MatRipple>
+                                <MatPaper Elevation="6" Rounded="true">@watcherCount Watchers</MatPaper>
+                            </MatRipple>
                         </td>
-                        <td width="98%">
-                            <MatPaper Elevation="6" Rounded="true">@eventCount Events</MatPaper>
+                        <td class="horizontal-center">
+                            <MatRipple>
+                                <MatPaper Elevation="6" Rounded="true">@alertCount Alerts</MatPaper>
+                            </MatRipple>
+                        </td>
+                        <td class="horizontal-center">
+                            <MatRipple>
+                                <MatPaper Elevation="6" Rounded="true">@checkCount Total Checks</MatPaper>
+                            </MatRipple>
                         </td>
                     </tr>
                 </tbody>
             </table>
-            <div class="mat-elevation-z8">Testing</div>
+            <div class="row">
+                <div style="width: 90%;">
+                    <RadzenChart>
+                        <RadzenColumnSeries Data="@chartValues" CategoryProperty="Name" Title="WobigTools Stats" LineType="LineType.Dashed" ValueProperty="Count" />
+                        <RadzenColumnOptions Radius="5" />
+                        <RadzenValueAxis>
+                            <RadzenGridLines Visible="true" />
+                            <RadzenAxisTitle Text="Counts" />
+                        </RadzenValueAxis>
+                    </RadzenChart>
+                </div>
+            </div>
         }
         <br />
         <div class="bottom-border" />
@@ -54,7 +87,9 @@
 @code {
     private int userCount = 0;
     private int watcherCount = 0;
-    private int eventCount = 0;
+    private int alertCount = 0;
+    private int checkCount = 0;
+    private List<ChartValue> chartValues = new List<ChartValue>();
 
     protected override void OnInitialized()
     {
@@ -63,6 +98,7 @@
         {
             CoreLogicLib.Standard.Core.InitializeWebTasks(MyHttpContext.AppBaseUrl);
         }
+        db.WatcherEventsChanged += WatcherEventChanged;
         UpdateUserCount();
         UpdateWatcherCount();
         UpdateWatcherEventCount();
@@ -71,16 +107,30 @@
     private void UpdateUserCount()
     {
         userCount = _userManager.Users.Count();
+        chartValues.Add(new ChartValue() { Name = "Users", Count = userCount });
     }
 
     private void UpdateWatcherCount()
     {
         watcherCount = Constants.SavedData.TrackedProducts.Count;
+        chartValues.Add(new ChartValue() { Name = "Watchers", Count = watcherCount });
     }
 
     private void UpdateWatcherEventCount()
     {
-        using var db = new AppDbContext();
-        eventCount = db.WatcherEvents.Count();
+        checkCount = db.WatcherEvents.Count();
+        alertCount = db.WatcherEvents.Where(x => x.Event == "Alert Trigger").Count();
+        chartValues.Add(new ChartValue() { Name = "Alerts", Count = alertCount });
+    }
+
+    private void WatcherEventChanged(object sender, EventArgs e)
+    {
+        checkCount = db.WatcherEvents.Count();
+        alertCount = db.WatcherEvents.Where(x => x.Event == "Alert Trigger").Count();
+        if (chartValues.Find(x => x.Name == "Alerts") != null)
+        {
+            chartValues.Remove(chartValues.Find(x => x.Name == "Alerts"));
+        }
+        chartValues.Add(new ChartValue() { Name = "Alerts", Count = alertCount });
     }
 }

@@ -38,6 +38,23 @@
                 </li>
             </Authorized>
         </AuthorizeView>
+        <AuthorizeView>
+            <Authorized>
+                <li class="navbar-toggler nav-item px-3">
+                    <form action="/Identity/Account/Logout">
+                        <button type="submit" class="btn btn-primary nav-pad">Log out</button>
+                    </form>
+                </li>
+            </Authorized>
+            <NotAuthorized>
+                <li class="navbar-toggler nav-item px-3">
+                    <a href="/Identity/Account/Register">Register</a>
+                </li>
+                <li class="navbar-toggler nav-item px-3">
+                    <a href="/Identity/Account/Login">Login</a>
+                </li>
+            </NotAuthorized>
+        </AuthorizeView>
     </ul>
 </div>
 

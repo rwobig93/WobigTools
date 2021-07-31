@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using WobigTools.Data;
 using MatBlazor;
+using Radzen;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
@@ -57,11 +58,15 @@ namespace WobigTools
             });
             // Extra components
             services.AddBlazorContextMenu();
+            services.AddScoped<DialogService>();
+            services.AddScoped<NotificationService>();
+            services.AddScoped<TooltipService>();
+            services.AddScoped<ContextMenuService>();
             // Authentication & Authorization
             services.AddDefaultIdentity<IdentityUser>(opt => 
                 {
                     opt.User.RequireUniqueEmail = true;
-                    //opt.SignIn.RequireConfirmedAccount = true;
+                    opt.SignIn.RequireConfirmedAccount = true;
                     opt.SignIn.RequireConfirmedEmail = true;
                     opt.Password.RequiredLength = 12;
                     opt.Password.RequireNonAlphanumeric = true;

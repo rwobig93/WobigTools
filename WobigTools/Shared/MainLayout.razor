@@ -1,43 +1,38 @@
 ﻿@inherits LayoutComponentBase
 
-<MatThemeProvider Theme="@theme1">
-    <div class="mat-theme-wobigtech">
-        @*<MatButton Icon="favorite">Text</MatButton>
-            <MatButton Raised="true" Icon="favorite">Raised</MatButton>
-            <MatButton Unelevated="true" Icon="favorite">Unelevated</MatButton>
-            <MatButton Outlined="true" Icon="favorite">Outlined</MatButton>
-            <MatButton Dense="true" Icon="favorite">Dense</MatButton>*@
-    </div>
-</MatThemeProvider>
+    <RadzenDialog />
+    <RadzenNotification />
+    <RadzenContextMenu />
+    <RadzenTooltip />
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <div class="main">
-        <div class="top-row px-4">
-            <WobigTools.Pages.Auth.LoginDisplay />
+    <div class="page">
+        <div class="sidebar">
+            <NavMenu />
         </div>
 
-        <div class="content px-4">
-            @Body
+        <div class="main">
+            <div class="top-row px-4">
+                <WobigTools.Pages.Auth.LoginDisplay />
+            </div>
+
+            <div class="content px-4">
+                @Body
+            </div>
         </div>
     </div>
-</div>
 
-@code
+    @code
         {
 
-    MatTheme theme1 = new MatTheme()
-    {
-        Primary = "#BB86FC",
-        Secondary = "#03DAC6",
-        Surface = "#121212",
-        Background = "#040404",
-        OnPrimary = "#898989",
-        OnSecondary = "#76B900",
-        OnSurface = "#898989"
-    };
+        MatTheme theme1 = new MatTheme()
+        {
+            Primary = "#BB86FC",
+            Secondary = "#03DAC6",
+            Surface = "#121212",
+            Background = "#040404",
+            OnPrimary = "#898989",
+            OnSecondary = "#76B900",
+            OnSurface = "#898989"
+        };
 
-}
+    }

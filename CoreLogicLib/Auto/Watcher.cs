@@ -69,6 +69,7 @@ namespace CoreLogicLib.Auto
                                 Triggered = tracker.Triggered
                             });
                             await db.SaveChangesAsync();
+                            db.WatcherEventChanged(new EventArgs());
                             //Constants.WatcherEvents.AddMessage($"Alert Triggered: {tracker.FriendlyName} | Keyword: {tracker.Keyword}");
                         }
                     }
@@ -93,11 +94,28 @@ namespace CoreLogicLib.Auto
                                 Triggered = tracker.Triggered
                             });
                             await db.SaveChangesAsync();
+                            db.WatcherEventChanged(new EventArgs());
                             //Constants.WatcherEvents.AddMessage($"Alert Reset: {tracker.FriendlyName} | Keyword: {tracker.Keyword}");
                         }
                         else
                         {
-                            Constants.WatcherEvents.AddMessage($"Alert Checked: {tracker.FriendlyName} | Keyword: {tracker.Keyword}");
+                            using var db = new AppDbContext();
+                            db.Add(new WatcherEvent
+                            {
+                                Event = "Alert Checked",
+                                AlertOnKeywordNotExist = tracker.AlertOnKeywordNotExist,
+                                AlertDestination = tracker.AlertDestination.AlertName,
+                                CheckInterval = tracker.CheckInterval.ToString(),
+                                Enabled = tracker.Enabled,
+                                FriendlyName = tracker.FriendlyName,
+                                Keyword = tracker.Keyword,
+                                PageURL = tracker.PageURL,
+                                TrackerID = tracker.TrackerID,
+                                Triggered = tracker.Triggered
+                            });
+                            await db.SaveChangesAsync();
+                            db.WatcherEventChanged(new EventArgs());
+                            //Constants.WatcherEvents.AddMessage($"Alert Checked: {tracker.FriendlyName} | Keyword: {tracker.Keyword}");
                         }
                     }
                 }
@@ -120,6 +138,7 @@ namespace CoreLogicLib.Auto
                         Triggered = tracker.Triggered
                     });
                     await db.SaveChangesAsync();
+                    db.WatcherEventChanged(new EventArgs());
                     //Constants.WatcherEvents.AddMessage($"Alert Checked: {tracker.FriendlyName} | Keyword: {tracker.Keyword}");
                 }
             }

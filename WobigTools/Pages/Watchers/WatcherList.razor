@@ -4,10 +4,9 @@
 @using SharedLib.Dto
 @using SharedLib.General
 @using MatBlazor
-@using WobigTools.Data
-@using CoreLogicLib.Auto
 
 @inject IMatToaster Toaster
+@inject AppDbContext db
 
 @attribute [Authorize(Roles = "WatcherList")] 
 
@@ -378,11 +377,9 @@
     {
         product.Enabled = !product.Enabled;
         Log.Information("Tracker toggled: {TrackerID} | {TrackerFriendlyName} | State: {TrackerState}", product.TrackerID, product.FriendlyName, product.Enabled);
-        using (var db = new AppDbContext())
-        {
-            db.Add(new WatcherAudit { TrackerID = product.TrackerID, WatcherName = product.FriendlyName, State = product.Enabled ? "Enabled" : "Disabled", ChangingUser = context.User.Identity.Name });
-            await db.SaveChangesAsync();
-        }
+        db.Add(new WatcherAudit { TrackerID = product.TrackerID, WatcherName = product.FriendlyName, State = product.Enabled ? "Enabled" : "Disabled", ChangingUser = context.User.Identity.Name });
+        await db.SaveChangesAsync();
+        db.WatcherAuditChanged(new EventArgs());
         //Constants.WatcherAuditLogs.AddMessage($"Watcher Toggled: {product.FriendlyName} | State: {product.Enabled} | User: {context.User.Identity.Name}");
         SavedData.Save();
         StateHasChanged();
@@ -392,11 +389,9 @@
     private async Task DeleteWatcher(TrackedProduct product, AuthenticationState context)
     {
         Log.Information("Deleting tracker: {TrackerID} | {TrackerFriendlyName} | {TrackerKeyword} | {TrackerURL}", product.TrackerID, product.FriendlyName, product.Keyword, product.PageURL);
-        using (var db = new AppDbContext())
-        {
-            db.Add(new WatcherAudit { TrackerID = product.TrackerID, WatcherName = product.FriendlyName, State = "Deleted", ChangingUser = context.User.Identity.Name });
-            await db.SaveChangesAsync();
-        }
+        db.Add(new WatcherAudit { TrackerID = product.TrackerID, WatcherName = product.FriendlyName, State = "Deleted", ChangingUser = context.User.Identity.Name });
+        await db.SaveChangesAsync();
+        db.WatcherAuditChanged(new EventArgs());
         //Constants.WatcherAuditLogs.AddMessage($"Watcher Deleted: {product.FriendlyName} | User: {context.User.Identity.Name}");
         Constants.SavedData.TrackedProducts.Remove(product);
         SavedData.Save();

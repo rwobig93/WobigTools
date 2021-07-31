@@ -17,10 +17,16 @@ html, body {
     /*background-color: #1A191D;*/
     background-image: linear-gradient(180deg, #76B900 0%, #1A191D 7%, #121212 70%, #040404 90%);
     background-repeat: no-repeat !important;
-    height: -webkit-fill-available !important;
-    width: -webkit-fill-available !important;
+    height: auto !important;
+    width: auto !important;
     /*background-image: url(Images/network-dots.jpg);*/
 }
+
+    body:not(.rz-default-scrollbars) ::-webkit-scrollbar,
+    body:not(.rz-default-scrollbars) ::-webkit-scrollbar-corner {
+        background-color: #505050;
+        border-radius: 10px;
+    }
 
 div#content {
     height: 100% !important;
@@ -345,6 +351,11 @@ input,
     width: 200px;
 }
 
+.rz-tick-text,
+.rz-axis .rz-axis-title {
+    fill: #898989;
+}
+
 .content {
     padding-top: 1.1rem;
 }
@@ -355,7 +366,10 @@ input,
 
 .invalid {
     color: red !important;
-    /*outline: 1px solid red;*/
+}
+
+.invalid-box {
+    outline: 1px solid red !important;
 }
 
 .validation-message {
@@ -366,9 +380,9 @@ input,
     border: 1px groove #76B900;
     border-radius: 5px;
     width: 95%;
-    height: auto;
+    height: 100px;
     min-height: 490px;
-    overflow: auto;
+    overflow: scroll;
     background: #040404;
 }
 
