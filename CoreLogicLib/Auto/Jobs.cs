@@ -2,8 +2,6 @@
 using CoreLogicLib.Standard;
 using Hangfire;
 using Hangfire.MemoryStorage;
-using Hangfire.MySql;
-using Microsoft.Extensions.Configuration;
 using Serilog;
 using SharedLib.Dto;
 using SharedLib.Extensions;

@@ -9,9 +9,9 @@
 
 <AuthorizeView Roles="Admin">
     <Authorized>
-        <WobigTools.Pages.Administration.DevConsole />
+        <WobigTools.Pages.Administration.SystemWarnings />
         <br />
-        <WobigTools.Pages.Administration.UsersWithoutRoles />
+        <WobigTools.Pages.Administration.DevConsole />
     </Authorized>
 </AuthorizeView>
 <AuthorizeView>
@@ -26,11 +26,22 @@
         }
         else
         {
-            <h2 class="horizontal-center">You have access!</h2>
-            <br />
-            <br />
-            <h4 class="horizontal-center">Feel free to use our tools (that you have access to)</h4>
-            <h4 class="horizontal-center">Use the navigation menu on the left or hamburger menu on mobile</h4>
+            <table class="table-invisible" width="95%">
+                <tbody>
+                    <tr>
+                        <td width="98%">
+                            <MatPaper Elevation="6" Rounded="true">@userCount Users</MatPaper>
+                        </td>
+                        <td width="98%">
+                            <MatPaper Elevation="6" Rounded="true">@watcherCount Watchers</MatPaper>
+                        </td>
+                        <td width="98%">
+                            <MatPaper Elevation="6" Rounded="true">@eventCount Events</MatPaper>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="mat-elevation-z8">Testing</div>
         }
         <br />
         <div class="bottom-border" />
@@ -41,13 +52,35 @@
 </AuthorizeView>
 
 @code {
+    private int userCount = 0;
+    private int watcherCount = 0;
+    private int eventCount = 0;
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        if (!Constants.HadFirstWebRequest)
+        if (!Constants.HadFirstLogin)
         {
             CoreLogicLib.Standard.Core.InitializeWebTasks(MyHttpContext.AppBaseUrl);
-            Constants.HadFirstWebRequest = true;
         }
+        UpdateUserCount();
+        UpdateWatcherCount();
+        UpdateWatcherEventCount();
+    }
+
+    private void UpdateUserCount()
+    {
+        userCount = _userManager.Users.Count();
+    }
+
+    private void UpdateWatcherCount()
+    {
+        watcherCount = Constants.SavedData.TrackedProducts.Count;
+    }
+
+    private void UpdateWatcherEventCount()
+    {
+        using var db = new AppDbContext();
+        eventCount = db.WatcherEvents.Count();
     }
 }

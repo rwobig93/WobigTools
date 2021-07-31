@@ -28,6 +28,6 @@ namespace SharedLib.General
         public static bool DebugMode { get; set; } = false;
         public static bool BetaMode { get; set; } = false;
         public static bool UpdateReady { get; set; } = false;
-        public static bool HadFirstWebRequest { get; set; } = false;
+        public static bool HadFirstLogin { get; set; } = false;
     }
 }

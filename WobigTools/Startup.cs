@@ -1,5 +1,4 @@
 using DataAccessLib.External;
-using DataAccessLib.Queriables;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -44,8 +43,7 @@ namespace WobigTools
             services.AddTransient<IEmailSender, EmailService>();
             // Data access
             services.AddTransient<ISqlDA, MySqlDA>();
-            services.AddDbContext<AppDbContext>(opt =>
-                opt.UseSqlite("DataSource=app.db"));
+            services.AddDbContext<AppDbContext>();
             // MatBlazor components
             services.AddMatBlazor();
             services.AddMatToaster(config =>
@@ -63,7 +61,7 @@ namespace WobigTools
             services.AddDefaultIdentity<IdentityUser>(opt => 
                 {
                     opt.User.RequireUniqueEmail = true;
-                    opt.SignIn.RequireConfirmedAccount = true;
+                    //opt.SignIn.RequireConfirmedAccount = true;
                     opt.SignIn.RequireConfirmedEmail = true;
                     opt.Password.RequiredLength = 12;
                     opt.Password.RequireNonAlphanumeric = true;

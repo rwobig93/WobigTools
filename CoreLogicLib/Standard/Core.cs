@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using CoreLogicLib.Auth;
 using System.Threading.Tasks;
 using System.Net.Http;
+using System.IO;
 
 namespace CoreLogicLib.Standard
 {
@@ -20,7 +21,7 @@ namespace CoreLogicLib.Standard
             HouseKeeping.ValidateLoggingReqs();
 
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.Async(c => c.File($"{Constants.PathLogs}\\{OSDynamic.GetProductAssembly().ProductName}_.log", rollingInterval: RollingInterval.Day,
+                .WriteTo.Async(c => c.File(Path.Combine(Constants.PathLogs, OSDynamic.GetProductAssembly().ProductName, "_.log"), rollingInterval: RollingInterval.Day,
                   fileSizeLimitBytes: 10000000,
                   rollOnFileSizeLimit: true,
                   outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
@@ -58,6 +59,7 @@ namespace CoreLogicLib.Standard
             Log.Verbose("Attempting to save all application data");
             Config.Save();
             SavedData.Save();
+            MessageHandler.Save();
             Log.Debug("Saved all application data");
         }
 

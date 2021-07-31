@@ -4,6 +4,8 @@
 @using SharedLib.Dto
 @using SharedLib.General
 @using MatBlazor
+@using WobigTools.Data
+@using CoreLogicLib.Auto
 
 @inject IMatToaster Toaster
 
@@ -11,6 +13,12 @@
 
 <AuthorizeView Roles="WatcherList, Admin">
     <Authorized>
+        @if (smtpConfigured)
+        {
+            <h5 class="horizontal-center">Note: Emails will come from @Constants.Config.SMTPEmailFrom</h5>
+            <h5 class="horizontal-center">Whitelist this email or check your spam folder if getting email alerts</h5>
+        }
+
         <h4 style="text-align: center">Options</h4>
         <div class="row">
             <div class="col text-center">
@@ -80,91 +88,91 @@
 
         <MatDialog @bind-IsOpen="@menuOpenAlerts">
             <EditForm Context="formContext" Model="@newAlert" OnValidSubmit="@AddAlertDestination">
-                    <DataAnnotationsValidator />
-                    <ValidationSummary />
-                    <table class="table" width="90%">
-                        <tbody>
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <table class="table" width="90%">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <MatTextField Label="Alert Name" @bind-Value="newAlert.AlertName" TValue="string" Required="true"></MatTextField>
+                            </td>
+                            <td>
+                                <MatSelect Label="Alert Destination" @bind-Value="@newAlert.AlertType">
+                                    <MatOption Value="0">Email</MatOption>
+                                    <MatOption Value="1">Discord</MatOption>
+                                    <MatOption Value="2">Email And Discord</MatOption>
+                                </MatSelect>
+                            </td>
+                        </tr>
+                        @if (newAlert.AlertType == 0)
+                        {
+                            newAlert.WebHookURL = "https://blank.com";
+                            newAlert.MentionString = "blank-string";
                             <tr>
-                                <td>
-                                    <MatTextField Label="Alert Name" @bind-Value="newAlert.AlertName" TValue="string" Required="true"></MatTextField>
-                                </td>
-                                <td>
-                                    <MatSelect Label="Alert Destination" @bind-Value="@newAlert.AlertType">
-                                        <MatOption Value="0">Email</MatOption>
-                                        <MatOption Value="1">Discord</MatOption>
-                                        <MatOption Value="2">Email And Discord</MatOption>
-                                    </MatSelect>
+                                <td width="90%">
+                                    <MatTooltip Context="tooltip" Tooltip="Seperate multiple emails with a ;">
+                                        <MatTextField RefBack="@tooltip" Label="Email(s)" Style="width: 90% !important;" @bind-Value="newAlert.Emails" TValue="string" Required="true"></MatTextField>
+                                    </MatTooltip>
                                 </td>
                             </tr>
-                            @if (newAlert.AlertType == 0)
-                            {
-                                newAlert.WebHookURL = "https://blank.com";
-                                newAlert.MentionString = "blank-string";
-                                <tr>
-                                    <td width="90%">
-                                        <MatTooltip Context="tooltip" Tooltip="Seperate multiple emails with a ;">
-                                            <MatTextField RefBack="@tooltip" Label="Email(s)" Style="width: 90% !important;" @bind-Value="newAlert.Emails" TValue="string" Required="true"></MatTextField>
-                                        </MatTooltip>
-                                    </td>
-                                </tr>
-                            }
-                            @if (newAlert.AlertType == 1)
-                            {
-                                newAlert.Emails = "blank@mail.com";
-                                <tr>
-                                    <td width="45%">
-                                        <MatTextField Label="Discord Webhook URL" @bind-Value="newAlert.WebHookURL" />
-                                    </td>
-                                    <td width="35%">
-                                        <MatTooltip Context="tooltip" Tooltip="Discord ID only, no <&> or @@">
-                                            <MatTextField RefBack="@tooltip" Label="Discord Mention ID" @bind-Value="newAlert.MentionString" />
-                                        </MatTooltip>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                    </td>
-                                    <td class="horizontal-center">
-                                        <MatButtonLink Target="_blank" Href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-">How to find a Discord ID</MatButtonLink>
-                                    </td>
-                                </tr>
-                            }
-                            @if (newAlert.AlertType == 2)
-                            {
-                                <tr>
-                                    <td width="90%">
-                                        <MatTooltip Context="tooltip" Tooltip="Seperate multiple emails with a ;">
-                                            <MatTextField RefBack="@tooltip" Label="Email(s)" Style="width: 90% !important;" @bind-Value="newAlert.Emails" TValue="string" Required="true"></MatTextField>
-                                        </MatTooltip>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td width="45%">
-                                        <MatTextField Label="Discord Webhook URL" @bind-Value="newAlert.WebHookURL" />
-                                    </td>
-                                    <td width="45%">
-                                        <MatTooltip Context="tooltip" Tooltip="Discord ID only, no <&> or @@">
-                                            <MatTextField RefBack="@tooltip" Label="Discord Mention ID" @bind-Value="newAlert.MentionString" />
-                                        </MatTooltip>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                    </td>
-                                    <td class="horizontal-center">
-                                        <MatButtonLink Target="_blank" Href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-">How to find a Discord ID</MatButtonLink>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                    <div class="row" style="width: 95%;">
-                        <div class="col text-center">
-                            <button class="btn btn-warning" @onclick="CloseAddAlertDestination">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Create Alert</button>
-                        </div>
+                        }
+                        @if (newAlert.AlertType == 1)
+                        {
+                            newAlert.Emails = "blank@mail.com";
+                            <tr>
+                                <td width="45%">
+                                    <MatTextField Label="Discord Webhook URL" @bind-Value="newAlert.WebHookURL" />
+                                </td>
+                                <td width="35%">
+                                    <MatTooltip Context="tooltip" Tooltip="Discord ID only, no <&> or @@">
+                                        <MatTextField RefBack="@tooltip" Label="Discord Mention ID" @bind-Value="newAlert.MentionString" />
+                                    </MatTooltip>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                                <td class="horizontal-center">
+                                    <MatButtonLink Target="_blank" Href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-">How to find a Discord ID</MatButtonLink>
+                                </td>
+                            </tr>
+                        }
+                        @if (newAlert.AlertType == 2)
+                        {
+                            <tr>
+                                <td width="90%">
+                                    <MatTooltip Context="tooltip" Tooltip="Seperate multiple emails with a ;">
+                                        <MatTextField RefBack="@tooltip" Label="Email(s)" Style="width: 90% !important;" @bind-Value="newAlert.Emails" TValue="string" Required="true"></MatTextField>
+                                    </MatTooltip>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="45%">
+                                    <MatTextField Label="Discord Webhook URL" @bind-Value="newAlert.WebHookURL" />
+                                </td>
+                                <td width="45%">
+                                    <MatTooltip Context="tooltip" Tooltip="Discord ID only, no <&> or @@">
+                                        <MatTextField RefBack="@tooltip" Label="Discord Mention ID" @bind-Value="newAlert.MentionString" />
+                                    </MatTooltip>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                                <td class="horizontal-center">
+                                    <MatButtonLink Target="_blank" Href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-">How to find a Discord ID</MatButtonLink>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <div class="row" style="width: 95%;">
+                    <div class="col text-center">
+                        <button class="btn btn-warning" @onclick="CloseAddAlertDestination">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Alert</button>
                     </div>
-                    <br />
+                </div>
+                <br />
             </EditForm>
         </MatDialog>
 
@@ -218,10 +226,28 @@
     private DisplayAlertModel newAlert = new DisplayAlertModel();
     private bool menuOpenAlerts = false;
     private bool menuOpenWatcher = false;
+    private bool smtpConfigured = false;
 
     protected override async Task OnInitializedAsync()
     {
         await Task.CompletedTask;
+        ValidateSMTP();
+    }
+
+    private void ValidateSMTP()
+    {
+        if (string.IsNullOrWhiteSpace(Constants.Config.SMTPEmailFrom) ||
+            string.IsNullOrWhiteSpace(Constants.Config.SMTPEmailName) ||
+            string.IsNullOrWhiteSpace(Constants.Config.SMTPPassword) ||
+            string.IsNullOrWhiteSpace(Constants.Config.SMTPUrl) ||
+            string.IsNullOrWhiteSpace(Constants.Config.SMTPUsername))
+        {
+            smtpConfigured = false;
+        }
+        else
+        {
+            smtpConfigured = true;
+        }
     }
 
     private async Task OpenAddAlertDestination()
@@ -352,7 +378,12 @@
     {
         product.Enabled = !product.Enabled;
         Log.Information("Tracker toggled: {TrackerID} | {TrackerFriendlyName} | State: {TrackerState}", product.TrackerID, product.FriendlyName, product.Enabled);
-        Constants.WatcherAuditLogs.AddMessage($"Watcher Toggled: {product.FriendlyName} | State: {product.Enabled} | User: {context.User.Identity.Name}");
+        using (var db = new AppDbContext())
+        {
+            db.Add(new WatcherAudit { TrackerID = product.TrackerID, WatcherName = product.FriendlyName, State = product.Enabled ? "Enabled" : "Disabled", ChangingUser = context.User.Identity.Name });
+            await db.SaveChangesAsync();
+        }
+        //Constants.WatcherAuditLogs.AddMessage($"Watcher Toggled: {product.FriendlyName} | State: {product.Enabled} | User: {context.User.Identity.Name}");
         SavedData.Save();
         StateHasChanged();
         await Task.CompletedTask;
@@ -361,7 +392,12 @@
     private async Task DeleteWatcher(TrackedProduct product, AuthenticationState context)
     {
         Log.Information("Deleting tracker: {TrackerID} | {TrackerFriendlyName} | {TrackerKeyword} | {TrackerURL}", product.TrackerID, product.FriendlyName, product.Keyword, product.PageURL);
-        Constants.WatcherAuditLogs.AddMessage($"Watcher Deleted: {product.FriendlyName} | User: {context.User.Identity.Name}");
+        using (var db = new AppDbContext())
+        {
+            db.Add(new WatcherAudit { TrackerID = product.TrackerID, WatcherName = product.FriendlyName, State = "Deleted", ChangingUser = context.User.Identity.Name });
+            await db.SaveChangesAsync();
+        }
+        //Constants.WatcherAuditLogs.AddMessage($"Watcher Deleted: {product.FriendlyName} | User: {context.User.Identity.Name}");
         Constants.SavedData.TrackedProducts.Remove(product);
         SavedData.Save();
         StateHasChanged();

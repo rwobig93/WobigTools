@@ -56,10 +56,10 @@
     {
         base.OnInitialized();
         Constants.DebugLog.MessagesChanged += IndexAsyncHandler;
-        if (!Constants.HadFirstWebRequest)
+        if (!Constants.HadFirstLogin)
         {
             CoreLogicLib.Standard.Core.InitializeWebTasks(MyHttpContext.AppBaseUrl);
-            Constants.HadFirstWebRequest = true;
+            Constants.HadFirstLogin = true;
         }
     }
 

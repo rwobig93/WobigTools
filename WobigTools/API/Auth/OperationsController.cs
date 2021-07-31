@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
+using SharedLib.General;
+using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace WobigTools.API.Auth
@@ -59,8 +63,12 @@ namespace WobigTools.API.Auth
                         UserName = user,
                         Email = user,
                         EmailConfirmed = true
-                    }, "superpassword");
-                    Log.Information("Created missing default user: {EmailAddress}", user);
+                    }, "SuperPassword123!");
+                    var newUser = await _userManager.FindByNameAsync(user);
+                    var confirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+                    await _userManager.ConfirmEmailAsync(newUser, confirmToken);
+                    await _userManager.AddToRoleAsync(newUser, "Admin");
+                    Log.Information("Created missing default user: UN[{UserName}] EM[{EmailAddress}]", newUser.UserName, newUser.Email);
                 }
                 else
                 {
@@ -70,5 +78,13 @@ namespace WobigTools.API.Auth
 
             Log.Debug("Finished default role and user validation");
         }
+
+        //public static async Task<ActionResult> DownloadFileFromString(string contentToDownload)
+        //{
+        //    byte[] auditLogContent = Encoding.ASCII.GetBytes(contentToDownload);
+        //    var stream = new MemoryStream(auditLogContent);
+        //    var result = new FileStreamResult(stream, "text/plain");
+        //    return File(stream, "application/force-download");
+        //}
     }
 }

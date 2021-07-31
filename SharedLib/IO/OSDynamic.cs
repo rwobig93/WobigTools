@@ -13,11 +13,16 @@ namespace SharedLib.IO
     {
         public static string GetStoragePath()
         {
-            var userPath = Environment.GetEnvironmentVariable(
-                RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
-                "LOCALAPPDATA" : "Home");
             ProductAssembly proAss = GetProductAssembly();
-            string basePath = Path.Combine(Path.Combine(userPath, proAss.CompanyName), proAss.ProductName);
+            string basePath;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                basePath = Path.Combine(Path.Combine(Environment.GetEnvironmentVariable("LOCALAPPDATA"), proAss.CompanyName), proAss.ProductName);
+            }
+            else
+            {
+                basePath = ".";
+            }
             if (Constants.DebugMode)
                 basePath = Path.Combine(basePath, "Test");
             else

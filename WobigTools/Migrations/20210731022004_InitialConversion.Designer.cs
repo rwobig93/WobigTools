@@ -5,19 +5,88 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using WobigTools.Data;
 
 namespace WobigTools.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20210724233905_Update")]
-    partial class Update
+    [Migration("20210731022004_InitialConversion")]
+    partial class InitialConversion
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "5.0.8");
+
+            modelBuilder.Entity("DataAccessLib.Models.WatcherAudit", b =>
+                {
+                    b.Property<int>("WatcherAuditID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ChangingUser")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("State")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("TimeStamp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("TrackerID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("WatcherName")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("WatcherAuditID");
+
+                    b.ToTable("WatcherAudits");
+                });
+
+            modelBuilder.Entity("DataAccessLib.Models.WatcherEvent", b =>
+                {
+                    b.Property<int>("WatcherEventID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AlertDestination")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("AlertOnKeywordNotExist")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CheckInterval")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Event")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FriendlyName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Keyword")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PageURL")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("TimeStamp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("TrackerID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Triggered")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("WatcherEventID");
+
+                    b.ToTable("WatcherEvents");
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {

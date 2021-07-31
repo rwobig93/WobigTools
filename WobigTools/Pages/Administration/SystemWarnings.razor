@@ -1,0 +1,69 @@
+﻿@using MatBlazor
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+
+@inject IMatToaster Toaster
+@inject UserManager<IdentityUser> _userManager
+@inject RoleManager<IdentityRole> _roleManager
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        @if (noRoleUsers.Count > 0)
+        {
+            <h2 class="horizontal-center invalid">Users Without Roles:</h2>
+            @foreach (var user in noRoleUsers)
+            {
+                <div class="horizontal-center invalid">@user</div>
+            }
+            <br />
+            <div class="bottom-border" />
+        }
+
+        @if (!smtpConfigured)
+        {
+            <br />
+            <h2 class="horizontal-center invalid">SMTP Isn't Configured, Please Configure SMTP On the Admin Settings Page</h2>
+            <h2 class="horizontal-center invalid">If not configured users can't register!</h2>
+        }
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    private List<string> noRoleUsers = new List<string>();
+    private bool smtpConfigured = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+        await GrabUsersWithNoRoles();
+        ValidateSMTP();
+    }
+
+    private async Task GrabUsersWithNoRoles()
+    {
+        foreach (var user in _userManager.Users.ToList())
+        {
+            var roleCount = await _userManager.GetRolesAsync(user);
+            if (roleCount.Count <= 0)
+            {
+                noRoleUsers.Add(user.Email);
+            }
+        }
+    }
+
+    private void ValidateSMTP()
+    {
+        if (string.IsNullOrWhiteSpace(Constants.Config.SMTPEmailFrom) ||
+            string.IsNullOrWhiteSpace(Constants.Config.SMTPEmailName) ||
+            string.IsNullOrWhiteSpace(Constants.Config.SMTPPassword) ||
+            string.IsNullOrWhiteSpace(Constants.Config.SMTPUrl) ||
+            string.IsNullOrWhiteSpace(Constants.Config.SMTPUsername))
+        {
+            smtpConfigured = false;
+        }
+        else
+        {
+            smtpConfigured = true;
+        }
+    }
+}

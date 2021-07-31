@@ -1,15 +1,21 @@
 ﻿@page "/Watchers/Events"
 @using SharedLib.General
+@using System.Text
+@using Microsoft.EntityFrameworkCore 
 
+@inject IJSRuntime JSRuntime
 @attribute [Authorize(Roles = "WatcherEvents")]
 
 <AuthorizeView Roles="WatcherEvents, Admin">
     <Authorized>
         <h3 class="horizontal-center">Watcher Events</h3>
-        <div class="textarea" style="height: max-content;">
-            @foreach (var line in Constants.WatcherEvents.Messages)
+        <div class="textarea">
+            @using (var db = new AppDbContext())
             {
-                <div class="display-message">@line</div>
+                @foreach (var watcherEvent in db.WatcherEvents.OrderBy(x => x.TimeStamp).Take(100))
+                {
+                    <div class="display-message">@watcherEvent.TimeStamp :: @watcherEvent.Event: @watcherEvent.FriendlyName | Keyword(s): @watcherEvent.Keyword</div>
+                }
             }
         </div>
         <br />
@@ -23,12 +29,18 @@
 <AuthorizeView Roles="Admin">
     <Authorized>
         <h3 class="horizontal-center">Watcher Audit Logs</h3>
-        <div class="textarea" style="height: max-content;">
-            @foreach (var line in Constants.WatcherAuditLogs.Messages)
+        <div class="textarea">
+            @using (var db = new AppDbContext())
             {
-                <div class="display-message">@line</div>
+                @foreach (var auditEvent in db.WatcherAudits.OrderBy(x => x.TimeStamp).Take(100))
+                {
+                    <div class="display-message">@auditEvent.TimeStamp :: Name[@auditEvent.WatcherName] State[@auditEvent.State] User[@auditEvent.ChangingUser]</div>
+                }
             }
         </div>
+        <div class="horizontal-center"><button class="btn btn-primary" @onclick="DownloadAuditLog">Download Audit Log</button></div>
+        <div class="horizontal-center"><button class="btn btn-secondary" @onclick="DownloadAuditLogFast">Download Audit Log Fast</button></div>
+        <br />
         <br />
         <div class="bottom-border" />
     </Authorized>
@@ -43,14 +55,53 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        Constants.WatcherEvents.MessagesChanged += IndexAsyncHandler;
+        //Constants.WatcherEvents.MessagesChanged += IndexAsyncHandler;
+        using var db = new AppDbContext();
+        db.SavedChanges += IndexAsyncHandler;
     }
 
-    private async void IndexAsyncHandler()
+    private async void IndexAsyncHandler(object sender, Microsoft.EntityFrameworkCore.SavedChangesEventArgs e)
     {
         await InvokeAsync(() =>
         {
             StateHasChanged();
         });
+    }
+
+    private async Task DownloadAuditLog()
+    {
+        StringBuilder sb = new StringBuilder();
+        @using (var db = new AppDbContext())
+        {
+            @foreach (var auditEvent in db.WatcherAudits.OrderBy(x => x.TimeStamp).Take(100))
+            {
+                sb.Append($"{auditEvent.TimeStamp} :: Name[{auditEvent.WatcherName}] State[{auditEvent.State}] User[{auditEvent.ChangingUser}]");
+            }
+        }
+        byte[] fileContent = System.Text.Encoding.UTF8.GetBytes(sb.ToString());
+        await JSRuntime.InvokeVoidAsync("BlazorDownloadFile", "AuditLog.log", "text/plain", fileContent);
+    }
+
+    private async Task DownloadAuditLogFast()
+    {
+        StringBuilder sb = new StringBuilder();
+        @using (var db = new AppDbContext())
+        {
+            @foreach (var auditEvent in db.WatcherAudits.OrderBy(x => x.TimeStamp).Take(100))
+            {
+                sb.Append($"{auditEvent.TimeStamp} :: Name[{auditEvent.WatcherName}] State[{auditEvent.State}] User[{auditEvent.ChangingUser}]");
+            }
+        }
+        byte[] fileContent = System.Text.Encoding.UTF8.GetBytes(sb.ToString());
+        // Check if the IJSRuntime is the WebAssembly implementation of the JSRuntime
+        if (JSRuntime is IJSUnmarshalledRuntime webAssemblyJSRuntime)
+        {
+            webAssemblyJSRuntime.InvokeUnmarshalled<string, string, byte[], bool>("BlazorDownloadFileFast", "AuditLog.log", "text/plain", fileContent);
+        }
+        else
+        {
+            // Fall back to the slow method if not in WebAssembly
+            await JSRuntime.InvokeVoidAsync("BlazorDownloadFile", "AuditLog.log", "text/plain", fileContent);
+        }
     }
 }

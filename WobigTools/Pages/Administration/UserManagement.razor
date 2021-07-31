@@ -117,9 +117,17 @@
 
     private async Task RemoveRole(string roleName)
     {
-        rolesWeHave.Remove(roleName);
-        rolesWeWant.Add(_roleManager.FindByNameAsync(roleName).Result);
-        StateHasChanged();
+        if (editingUser.UserName == "superperson@wobigtools.com" && roleName == "Admin")
+        {
+            Toaster.CustomToast("Impossible", "Can't delete Admin from the Local Admin", MatToastType.Danger);
+            StateHasChanged();
+        }
+        else
+        {
+            rolesWeHave.Remove(roleName);
+            rolesWeWant.Add(_roleManager.FindByNameAsync(roleName).Result);
+            StateHasChanged();
+        }
         await Task.CompletedTask;
     }
 
@@ -198,15 +206,36 @@
     private async Task ResetPassword(ItemClickEventArgs e, AuthenticationState authState)
     {
         editingUser = e.Data as IdentityUser;
-        var newPassword = await MatDialogService.PromptAsync("Enter a new password:");
-        if (!string.IsNullOrWhiteSpace(newPassword))
+        if (SMTPIsConfigured())
         {
             Log.Debug("Resetting password for user: {EmailAddress} | ActionBy: {ActionUser}", authState.User.Identity.Name);
+            var newPassword = Generator.CreateRandomPassword(26);
             var passToken = await _userManager.GeneratePasswordResetTokenAsync(editingUser);
             await _userManager.ResetPasswordAsync(editingUser, passToken, newPassword);
+            await CoreLogicLib.Comm.Communication.SendEmailAsync("Password Reset", $"Your email has been reset to: {newPassword}{Environment.NewLine}Please login to your account using this password", new string[] { authState.User.Identity.Name });
             Log.Information("Password reset for user: {EmailAddress} | ActionBy: {ActionUser}", authState.User.Identity.Name);
-            Toaster.CustomToast(editingUser.Email, "Password reset successfully!", MatToastType.Success);
+            Toaster.CustomToast(editingUser.Email, "Password reset email sent successfully!", MatToastType.Success);
+        }
+        else
+        {
+            Toaster.CustomToast("SMTP Failure", "SMTP Isn't configured, can't send email", MatToastType.Danger);
         }
         editingUser = new IdentityUser("empty");
+    }
+
+    private bool SMTPIsConfigured()
+    {
+        if (string.IsNullOrWhiteSpace(Constants.Config.SMTPEmailFrom) ||
+            string.IsNullOrWhiteSpace(Constants.Config.SMTPEmailName) ||
+            string.IsNullOrWhiteSpace(Constants.Config.SMTPPassword) ||
+            string.IsNullOrWhiteSpace(Constants.Config.SMTPUrl) ||
+            string.IsNullOrWhiteSpace(Constants.Config.SMTPUsername))
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
 }
