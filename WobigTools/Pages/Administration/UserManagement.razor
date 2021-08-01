@@ -9,9 +9,7 @@
 @inject UserManager<IdentityUser> _userManager
 @inject RoleManager<IdentityRole> _roleManager
 
-@attribute [Authorize(Roles = "Admin")]
-
-<AuthorizeView Roles="Admin">
+<AuthorizeView Roles="Admin, Moderator">
     <Authorized>
         <h3 style="text-align: center">Current Users</h3>
         <h5 style="text-align: center">Right click a user to edit</h5>
@@ -45,8 +43,11 @@
         <ContextMenu Id="userMenu" Context="menuContext">
             <Item OnClick="@OpenRoleMenu">Edit Roles</Item>
             <Item OnClick="((e) => UnlockAccount(e, context))">Unlock Account</Item>
-            <Item OnClick="((e) => ResetPassword(e, context))">Reset Password</Item>
-            <Item OnClick="((e) => DeleteUser(e, context))">Delete User</Item>
+            @if (UserIsAdmin(context).Result)
+            {
+                <Item OnClick="((e) => ResetPassword(e, context))">Reset Password</Item>
+                <Item OnClick="((e) => DeleteUser(e, context))">Delete User</Item>
+            }
         </ContextMenu>
         <MatDialog @bind-IsOpen="@roleMenuOpen">
             <h3 class="horizontal-center" style="padding-top: 0.4em; padding-bottom: 0.2em;">Edit Roles for @editingUser.Email</h3>
@@ -63,7 +64,14 @@
                             <table class="table">
                                 @foreach (var role in rolesWeHave)
                                 {
-                                    <tr><td><button class="btn btn-secondary" @onclick="(() => RemoveRole(role))">X</button> @role</td></tr>
+                                    @if ((UserIsModerator(context).Result && (role != "WatcherEvents" && role != "WatcherList")))
+                                    {
+                                        <tr><td><button disabled class="btn btn-secondary" @onclick="(() => RemoveRole(role, context))">X</button> @role</td></tr>
+                                    }
+                                    else
+                                    {
+                                        <tr><td><button class="btn btn-secondary" @onclick="(() => RemoveRole(role, context))">X</button> @role</td></tr>
+                                    }
                                 }
                             </table>
                         </td>
@@ -71,7 +79,14 @@
                             <table class="table">
                                 @foreach (var role in rolesWeWant)
                                 {
-                                    <tr><td><button class="btn btn-secondary" @onclick="(() => AddRole(role.Name))">+</button> @role.Name</td></tr>
+                                    @if ((UserIsModerator(context).Result && (role.Name != "WatcherEvents" && role.Name != "WatcherList")))
+                                    {
+                                        <tr><td><button disabled class="btn btn-secondary" @onclick="(() => AddRole(role.Name, context))">+</button> @role.Name</td></tr>
+                                    }
+                                    else
+                                    {
+                                        <tr><td><button class="btn btn-secondary" @onclick="(() => AddRole(role.Name, context))">+</button> @role.Name</td></tr>
+                                    }
                                 }
                             </table>
                         </td>
@@ -115,27 +130,42 @@
         await Task.CompletedTask;
     }
 
-    private async Task RemoveRole(string roleName)
+    private async Task RemoveRole(string roleName, AuthenticationState context)
     {
         if (editingUser.UserName == "superperson@wobigtools.com" && roleName == "Admin")
         {
             Toaster.CustomToast("Impossible", "Can't delete Admin from the Local Admin", MatToastType.Danger);
             StateHasChanged();
         }
+        else if ((UserIsModerator(context).Result && (roleName != "WatcherEvents" && roleName != "WatcherList")))
+        {
+            Toaster.CustomToast("No Access", "You don't have access to that role", MatToastType.Warning);
+            StateHasChanged();
+        }
         else
         {
             rolesWeHave.Remove(roleName);
+            Log.Information("Role {RoleName} removed from {EmailAddress} | ActionUser: {ActionUser}", roleName, editingUser.UserName, context.User.Identity.Name);
             rolesWeWant.Add(_roleManager.FindByNameAsync(roleName).Result);
             StateHasChanged();
         }
         await Task.CompletedTask;
     }
 
-    private async Task AddRole(string roleName)
+    private async Task AddRole(string roleName, AuthenticationState context)
     {
-        rolesWeHave.Add(roleName);
-        rolesWeWant.Remove(_roleManager.FindByNameAsync(roleName).Result);
-        StateHasChanged();
+        if ((UserIsModerator(context).Result && (roleName != "WatcherEvents" && roleName != "WatcherList")))
+        {
+            Toaster.CustomToast("No Access", "You don't have access to that role", MatToastType.Warning);
+            StateHasChanged();
+        }
+        else
+        {
+            rolesWeHave.Add(roleName);
+            Log.Information("Role {RoleName} added to {EmailAddress} | ActionUser: {ActionUser}", roleName, editingUser.UserName, context.User.Identity.Name);
+            rolesWeWant.Remove(_roleManager.FindByNameAsync(roleName).Result);
+            StateHasChanged();
+        }
         await Task.CompletedTask;
     }
 
@@ -237,5 +267,17 @@
         {
             return true;
         }
+    }
+
+    private async Task<bool> UserIsModerator(AuthenticationState context)
+    {
+        var user = await _userManager.FindByNameAsync(context.User.Identity.Name);
+        return await _userManager.IsInRoleAsync(user, "Moderator");
+    }
+
+    private async Task<bool> UserIsAdmin(AuthenticationState context)
+    {
+        var user = await _userManager.FindByNameAsync(context.User.Identity.Name);
+        return await _userManager.IsInRoleAsync(user, "Admin");
     }
 }

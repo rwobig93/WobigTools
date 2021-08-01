@@ -9,7 +9,7 @@
 @inject UserManager<IdentityUser> _userManager
 @inject RoleManager<IdentityRole> _roleManager
 
-<AuthorizeView Roles="Admin">
+<AuthorizeView Roles="Admin, Moderator">
     <Authorized>
         <SMTPSettings />
         <br />

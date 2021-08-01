@@ -33,7 +33,8 @@ namespace WobigTools.API.Auth
                 "TestRole",
                 "WatcherEvents",
                 "WatcherList",
-                "Developer"
+                "Developer",
+                "Moderator"
             };
 
             var defaultUsers = new string[]

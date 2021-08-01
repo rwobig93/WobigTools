@@ -3,7 +3,6 @@
 
 @inject IJSRuntime JSRuntime
 @inject AppDbContext db
-@attribute [Authorize(Roles = "WatcherEvents")]
 
 <AuthorizeView Roles="WatcherEvents, Admin">
     <Authorized>
@@ -25,9 +24,13 @@
     </NotAuthorized>
 </AuthorizeView>
 <br />
-<AuthorizeView Roles="Admin">
+<AuthorizeView Roles="Admin, Moderator">
     <Authorized>
         <h3 class="horizontal-center">Watcher Audit Logs</h3>
+        <div class="horizontal-center">
+            <button class="btn btn-primary" @onclick="DownloadAuditLog">Download Audit Log</button>
+        </div>
+        <br />
         <div class="textarea">
             @using (var db = new AppDbContext())
             {
@@ -37,9 +40,6 @@
                 }
             }
         </div>
-        <div class="horizontal-center"><button class="btn btn-primary" @onclick="DownloadAuditLog">Download Audit Log</button></div>
-        <div class="horizontal-center"><button class="btn btn-secondary" @onclick="DownloadAuditLogFast">Download Audit Log Fast</button></div>
-        <br />
         <br />
         <div class="bottom-border" />
     </Authorized>
@@ -56,8 +56,8 @@
         base.OnInitialized();
         //Constants.WatcherEvents.MessagesChanged += IndexAsyncHandler;
         //db.SavedChanges += IndexAsyncHandler;
-        db.WatcherEventsChanged += IndexAsyncHandler;
-        db.WatcherAuditsChanged += IndexAsyncHandler;
+        //db.WatcherEventsChanged += IndexAsyncHandler;
+        //db.WatcherAuditsChanged += IndexAsyncHandler;
     }
 
     private async void IndexAsyncHandler(object sender, EventArgs e)

@@ -165,7 +165,7 @@ input,
     }
 
 .noteworthy {
-    color: #5c5c5c;
+    color: #008ac9;
 }
 
 .mdc-text-field,
@@ -351,6 +351,9 @@ input,
     width: 200px;
 }
 
+.mdc-ripple-surface.mdc-ripple-upgraded--foreground-activation {
+}
+
 .rz-tick-text,
 .rz-axis .rz-axis-title {
     fill: #898989;
@@ -370,6 +373,12 @@ input,
 
 .invalid-box {
     outline: 1px solid red !important;
+}
+
+.title {
+    color: #76B900;
+    text-decoration: double;
+    text-emphasis: sesame;
 }
 
 .validation-message {

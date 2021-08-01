@@ -69,7 +69,7 @@ namespace CoreLogicLib.Auto
                                 Triggered = tracker.Triggered
                             });
                             await db.SaveChangesAsync();
-                            db.WatcherEventChanged(new EventArgs());
+                            //db.WatcherEventChanged(new EventArgs());
                             //Constants.WatcherEvents.AddMessage($"Alert Triggered: {tracker.FriendlyName} | Keyword: {tracker.Keyword}");
                         }
                     }
@@ -94,7 +94,7 @@ namespace CoreLogicLib.Auto
                                 Triggered = tracker.Triggered
                             });
                             await db.SaveChangesAsync();
-                            db.WatcherEventChanged(new EventArgs());
+                            //db.WatcherEventChanged(new EventArgs());
                             //Constants.WatcherEvents.AddMessage($"Alert Reset: {tracker.FriendlyName} | Keyword: {tracker.Keyword}");
                         }
                         else
@@ -114,7 +114,7 @@ namespace CoreLogicLib.Auto
                                 Triggered = tracker.Triggered
                             });
                             await db.SaveChangesAsync();
-                            db.WatcherEventChanged(new EventArgs());
+                            //db.WatcherEventChanged(new EventArgs());
                             //Constants.WatcherEvents.AddMessage($"Alert Checked: {tracker.FriendlyName} | Keyword: {tracker.Keyword}");
                         }
                     }
@@ -138,7 +138,7 @@ namespace CoreLogicLib.Auto
                         Triggered = tracker.Triggered
                     });
                     await db.SaveChangesAsync();
-                    db.WatcherEventChanged(new EventArgs());
+                    //db.WatcherEventChanged(new EventArgs());
                     //Constants.WatcherEvents.AddMessage($"Alert Checked: {tracker.FriendlyName} | Keyword: {tracker.Keyword}");
                 }
             }

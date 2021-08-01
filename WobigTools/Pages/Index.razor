@@ -2,6 +2,8 @@
 @using MatBlazor
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Identity
+@using Radzen
+@using Radzen.Blazor
 
 @inject IMatToaster Toaster
 @inject UserManager<IdentityUser> _userManager
@@ -18,7 +20,7 @@
 </AuthorizeView>
 <AuthorizeView>
     <Authorized>
-        @if (_userManager.GetRolesAsync(_userManager.GetUserAsync(context.User).Result).Result.Count <= 0)
+        @if (UserHasNoRoles(context).Result)
         {
         <div class="invalid-box">
             <h2 class="horizontal-center">You don't currently have any access</h2>
@@ -42,22 +44,22 @@
                     <tr class="horizontal-center">
                         <td class="horizontal-center">
                             <MatRipple>
-                                <MatPaper Elevation="6" Rounded="true">@userCount Users</MatPaper>
+                                <MatPaper Class="title" Elevation="6" Rounded="true">@userCount Users</MatPaper>
                             </MatRipple>
                         </td>
                         <td class="horizontal-center">
                             <MatRipple>
-                                <MatPaper Elevation="6" Rounded="true">@watcherCount Watchers</MatPaper>
+                                <MatPaper Class="title" Elevation="6" Rounded="true">@watcherCount Watchers</MatPaper>
                             </MatRipple>
                         </td>
                         <td class="horizontal-center">
                             <MatRipple>
-                                <MatPaper Elevation="6" Rounded="true">@alertCount Alerts</MatPaper>
+                                <MatPaper Class="title" Elevation="6" Rounded="true">@alertCount Alerts</MatPaper>
                             </MatRipple>
                         </td>
                         <td class="horizontal-center">
                             <MatRipple>
-                                <MatPaper Elevation="6" Rounded="true">@checkCount Total Checks</MatPaper>
+                                <MatPaper Class="title" Elevation="6" Rounded="true">@checkCount Checks</MatPaper>
                             </MatRipple>
                         </td>
                     </tr>
@@ -68,7 +70,7 @@
                     <RadzenChart>
                         <RadzenColumnSeries Data="@chartValues" CategoryProperty="Name" Title="WobigTools Stats" LineType="LineType.Dashed" ValueProperty="Count" />
                         <RadzenColumnOptions Radius="5" />
-                        <RadzenValueAxis>
+                        <RadzenValueAxis Step="1" Min="0">
                             <RadzenGridLines Visible="true" />
                             <RadzenAxisTitle Text="Counts" />
                         </RadzenValueAxis>
@@ -89,6 +91,7 @@
     private int watcherCount = 0;
     private int alertCount = 0;
     private int checkCount = 0;
+    private int destCount = 0;
     private List<ChartValue> chartValues = new List<ChartValue>();
 
     protected override void OnInitialized()
@@ -98,39 +101,52 @@
         {
             CoreLogicLib.Standard.Core.InitializeWebTasks(MyHttpContext.AppBaseUrl);
         }
-        db.WatcherEventsChanged += WatcherEventChanged;
+        //db.WatcherEventsChanged += WatcherEventChanged;
         UpdateUserCount();
-        UpdateWatcherCount();
-        UpdateWatcherEventCount();
+        UpdateWatcherCounts();
+        UpdateDestinationCount();
+        UpdateCharts();
     }
 
     private void UpdateUserCount()
     {
         userCount = _userManager.Users.Count();
-        chartValues.Add(new ChartValue() { Name = "Users", Count = userCount });
     }
 
-    private void UpdateWatcherCount()
+    private void UpdateWatcherCounts()
     {
         watcherCount = Constants.SavedData.TrackedProducts.Count;
+        checkCount = db.WatcherEvents.Count();
+        alertCount = db.WatcherEvents.Where(x => x.Event == "Alert Trigger").Count();
+    }
+
+    private void UpdateDestinationCount()
+    {
+        destCount = Constants.SavedData.Alerts.Count();
+    }
+
+    private void UpdateCharts()
+    {
+        chartValues.Add(new ChartValue() { Name = "Users", Count = userCount });
         chartValues.Add(new ChartValue() { Name = "Watchers", Count = watcherCount });
+        chartValues.Add(new ChartValue() { Name = "Destinations", Count = destCount });
     }
 
-    private void UpdateWatcherEventCount()
+    private async Task<bool> UserHasNoRoles(AuthenticationState context)
     {
-        checkCount = db.WatcherEvents.Count();
-        alertCount = db.WatcherEvents.Where(x => x.Event == "Alert Trigger").Count();
-        chartValues.Add(new ChartValue() { Name = "Alerts", Count = alertCount });
+        var user = await _userManager.GetUserAsync(context.User);
+        var roles = await _userManager.GetRolesAsync(user);
+        return roles.Count <= 0;
     }
 
-    private void WatcherEventChanged(object sender, EventArgs e)
-    {
-        checkCount = db.WatcherEvents.Count();
-        alertCount = db.WatcherEvents.Where(x => x.Event == "Alert Trigger").Count();
-        if (chartValues.Find(x => x.Name == "Alerts") != null)
-        {
-            chartValues.Remove(chartValues.Find(x => x.Name == "Alerts"));
-        }
-        chartValues.Add(new ChartValue() { Name = "Alerts", Count = alertCount });
-    }
+    //private void WatcherEventChanged(object sender, EventArgs e)
+    //{
+    //    checkCount = db.WatcherEvents.Count();
+    //    alertCount = db.WatcherEvents.Where(x => x.Event == "Alert Trigger").Count();
+    //    if (chartValues.Find(x => x.Name == "Alerts") != null)
+    //    {
+    //        chartValues.Remove(chartValues.Find(x => x.Name == "Alerts"));
+    //    }
+    //    chartValues.Add(new ChartValue() { Name = "Alerts", Count = alertCount });
+    //}
 }
