@@ -9,7 +9,7 @@
     <Authorized>
         <h1 class="horizontal-center title">Watcher Events</h1>
         <div class="textarea">
-            @foreach (var watcherEvent in watcherEvents)
+            @foreach (var watcherEvent in db.WatcherEvents.OrderByDescending(x => x.TimeStamp).Take(100))
             {
                 <div class="display-message">@watcherEvent.TimeStamp :: @watcherEvent.Event: @watcherEvent.FriendlyName | Keyword(s): @watcherEvent.Keyword</div>
             }
@@ -30,7 +30,7 @@
         </div>
         <br />
         <div class="textarea">
-            @foreach (var auditEvent in watcherAudits)
+            @foreach (var auditEvent in db.WatcherAudits.OrderByDescending(x => x.TimeStamp).Take(100))
             {
                 <div class="display-message">@auditEvent.TimeStamp :: Name[@auditEvent.WatcherName] State[@auditEvent.State] User[@auditEvent.ChangingUser]</div>
             }
@@ -46,14 +46,9 @@
 </AuthorizeView>
 
 @code {
-    private List<WatcherEvent> watcherEvents = new List<WatcherEvent>();
-    private List<WatcherAudit> watcherAudits = new List<WatcherAudit>();
-
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        WobigToolsEvents.WatcherEventOccured += IndexAsyncHandler;
-        WobigToolsEvents.WatcherAuditOccured += IndexAsyncHandler;
     }
 
     private async void IndexAsyncHandler(object sender, object eventObject)
@@ -93,11 +88,5 @@
             // Fall back to the slow method if not in WebAssembly
             await JSRuntime.InvokeVoidAsync("BlazorDownloadFile", "AuditLog.log", "text/plain", fileContent);
         }
-    }
-
-    private void UpdateWatcherList()
-    {
-        watcherEvents = db.WatcherEvents.OrderByDescending(x => x.TimeStamp).Take(100).ToList();
-        watcherAudits = db.WatcherAudits.OrderByDescending(x => x.TimeStamp).Take(100).ToList();
     }
 }
