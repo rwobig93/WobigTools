@@ -1,19 +1,17 @@
 ﻿@page "/Watchers/Events"
 @using System.Text
+@using CoreLogicLib.Standard 
 
 @inject IJSRuntime JSRuntime
 @inject AppDbContext db
 
 <AuthorizeView Roles="WatcherEvents, Admin">
     <Authorized>
-        <h3 class="horizontal-center">Watcher Events</h3>
+        <h1 class="horizontal-center title">Watcher Events</h1>
         <div class="textarea">
-            @using (var db = new AppDbContext())
+            @foreach (var watcherEvent in watcherEvents)
             {
-                @foreach (var watcherEvent in db.WatcherEvents.OrderByDescending(x => x.TimeStamp).Take(100))
-                {
-                    <div class="display-message">@watcherEvent.TimeStamp :: @watcherEvent.Event: @watcherEvent.FriendlyName | Keyword(s): @watcherEvent.Keyword</div>
-                }
+                <div class="display-message">@watcherEvent.TimeStamp :: @watcherEvent.Event: @watcherEvent.FriendlyName | Keyword(s): @watcherEvent.Keyword</div>
             }
         </div>
         <br />
@@ -26,18 +24,15 @@
 <br />
 <AuthorizeView Roles="Admin, Moderator">
     <Authorized>
-        <h3 class="horizontal-center">Watcher Audit Logs</h3>
+        <h1 class="horizontal-center title">Watcher Audit Logs</h1>
         <div class="horizontal-center">
             <button class="btn btn-primary" @onclick="DownloadAuditLog">Download Audit Log</button>
         </div>
         <br />
         <div class="textarea">
-            @using (var db = new AppDbContext())
+            @foreach (var auditEvent in watcherAudits)
             {
-                @foreach (var auditEvent in db.WatcherAudits.OrderByDescending(x => x.TimeStamp).Take(100))
-                {
-                    <div class="display-message">@auditEvent.TimeStamp :: Name[@auditEvent.WatcherName] State[@auditEvent.State] User[@auditEvent.ChangingUser]</div>
-                }
+                <div class="display-message">@auditEvent.TimeStamp :: Name[@auditEvent.WatcherName] State[@auditEvent.State] User[@auditEvent.ChangingUser]</div>
             }
         </div>
         <br />
@@ -51,16 +46,17 @@
 </AuthorizeView>
 
 @code {
+    private List<WatcherEvent> watcherEvents = new List<WatcherEvent>();
+    private List<WatcherAudit> watcherAudits = new List<WatcherAudit>();
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        //Constants.WatcherEvents.MessagesChanged += IndexAsyncHandler;
-        //db.SavedChanges += IndexAsyncHandler;
-        //db.WatcherEventsChanged += IndexAsyncHandler;
-        //db.WatcherAuditsChanged += IndexAsyncHandler;
+        WobigToolsEvents.WatcherEventOccured += IndexAsyncHandler;
+        WobigToolsEvents.WatcherAuditOccured += IndexAsyncHandler;
     }
 
-    private async void IndexAsyncHandler(object sender, EventArgs e)
+    private async void IndexAsyncHandler(object sender, object eventObject)
     {
         await InvokeAsync(() =>
         {
@@ -73,7 +69,7 @@
         StringBuilder sb = new StringBuilder();
         @foreach (var auditEvent in db.WatcherAudits.OrderBy(x => x.TimeStamp).Take(100))
         {
-            sb.Append($"{auditEvent.TimeStamp} :: Name[{auditEvent.WatcherName}] State[{auditEvent.State}] User[{auditEvent.ChangingUser}]");
+            sb.Append($"{auditEvent.TimeStamp} :: Name[{auditEvent.WatcherName}] State[{auditEvent.State}] User[{auditEvent.ChangingUser}]{Environment.NewLine}");
         }
         byte[] fileContent = System.Text.Encoding.UTF8.GetBytes(sb.ToString());
         await JSRuntime.InvokeVoidAsync("BlazorDownloadFile", "AuditLog.log", "text/plain", fileContent);
@@ -97,5 +93,11 @@
             // Fall back to the slow method if not in WebAssembly
             await JSRuntime.InvokeVoidAsync("BlazorDownloadFile", "AuditLog.log", "text/plain", fileContent);
         }
+    }
+
+    private void UpdateWatcherList()
+    {
+        watcherEvents = db.WatcherEvents.OrderByDescending(x => x.TimeStamp).Take(100).ToList();
+        watcherAudits = db.WatcherAudits.OrderByDescending(x => x.TimeStamp).Take(100).ToList();
     }
 }

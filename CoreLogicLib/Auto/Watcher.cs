@@ -1,5 +1,6 @@
 ﻿using System;
 using CoreLogicLib.Comm;
+using CoreLogicLib.Standard;
 using DataAccessLib.External;
 using DataAccessLib.Models;
 using Serilog;
@@ -55,7 +56,7 @@ namespace CoreLogicLib.Auto
                             Log.Verbose("Alerting on tracker as logic matches", tracker, attempt1.KeywordExists);
                             ProcessAlertToSend(tracker);
                             using var db = new AppDbContext();
-                            db.Add(new WatcherEvent
+                            var newWatcherEvent = new WatcherEvent
                             {
                                 Event = "Alert Trigger",
                                 AlertOnKeywordNotExist = tracker.AlertOnKeywordNotExist,
@@ -67,7 +68,8 @@ namespace CoreLogicLib.Auto
                                 PageURL = tracker.PageURL,
                                 TrackerID = tracker.TrackerID,
                                 Triggered = tracker.Triggered
-                            });
+                            };
+                            db.Add(newWatcherEvent);
                             await db.SaveChangesAsync();
                             //db.WatcherEventChanged(new EventArgs());
                             //Constants.WatcherEvents.AddMessage($"Alert Triggered: {tracker.FriendlyName} | Keyword: {tracker.Keyword}");
@@ -80,7 +82,7 @@ namespace CoreLogicLib.Auto
                             Log.Verbose("Resetting on tracker as logatches", tracker, attempt1.KeywordExists);
                             ProcessAlertToReset(tracker);
                             using var db = new AppDbContext();
-                            db.Add(new WatcherEvent
+                            var newWatcherEvent = new WatcherEvent
                             {
                                 Event = "Alert Reset",
                                 AlertOnKeywordNotExist = tracker.AlertOnKeywordNotExist,
@@ -92,7 +94,8 @@ namespace CoreLogicLib.Auto
                                 PageURL = tracker.PageURL,
                                 TrackerID = tracker.TrackerID,
                                 Triggered = tracker.Triggered
-                            });
+                            };
+                            db.Add(newWatcherEvent);
                             await db.SaveChangesAsync();
                             //db.WatcherEventChanged(new EventArgs());
                             //Constants.WatcherEvents.AddMessage($"Alert Reset: {tracker.FriendlyName} | Keyword: {tracker.Keyword}");
@@ -100,7 +103,7 @@ namespace CoreLogicLib.Auto
                         else
                         {
                             using var db = new AppDbContext();
-                            db.Add(new WatcherEvent
+                            var newWatcherEvent = new WatcherEvent
                             {
                                 Event = "Alert Checked",
                                 AlertOnKeywordNotExist = tracker.AlertOnKeywordNotExist,
@@ -112,7 +115,8 @@ namespace CoreLogicLib.Auto
                                 PageURL = tracker.PageURL,
                                 TrackerID = tracker.TrackerID,
                                 Triggered = tracker.Triggered
-                            });
+                            };
+                            db.Add(newWatcherEvent);
                             await db.SaveChangesAsync();
                             //db.WatcherEventChanged(new EventArgs());
                             //Constants.WatcherEvents.AddMessage($"Alert Checked: {tracker.FriendlyName} | Keyword: {tracker.Keyword}");
@@ -124,7 +128,7 @@ namespace CoreLogicLib.Auto
                     Log.Verbose("Keyword found [{KWFound}] and Validation [{KWValidation}] don't match, not alerting", attempt1.KeywordExists, attempt2.KeywordExists);
                     Log.Information("Checked watcher for {TrackerName}, Keyword: {TrackerKeyword} | Alert not triggered", tracker.FriendlyName, tracker.Keyword);
                     using var db = new AppDbContext();
-                    db.Add(new WatcherEvent
+                    var newWatcherEvent = new WatcherEvent
                     {
                         Event = "Alert Checked",
                         AlertOnKeywordNotExist = tracker.AlertOnKeywordNotExist,
@@ -136,7 +140,8 @@ namespace CoreLogicLib.Auto
                         PageURL = tracker.PageURL,
                         TrackerID = tracker.TrackerID,
                         Triggered = tracker.Triggered
-                    });
+                    };
+                    db.Add(newWatcherEvent);
                     await db.SaveChangesAsync();
                     //db.WatcherEventChanged(new EventArgs());
                     //Constants.WatcherEvents.AddMessage($"Alert Checked: {tracker.FriendlyName} | Keyword: {tracker.Keyword}");

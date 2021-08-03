@@ -16,10 +16,6 @@
             <div class="col text-center">
                 <button Class="btn btn-primary" @onclick="@OpenAddAlertDestination">Add Alert Destination</button>
                 <button Class="btn btn-primary" @onclick="@OpenAddWatcher">Add Watcher</button>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col text-center">
                 <button Class="btn btn-secondary" @onclick="@OpenHowToDoTheThing">How do I do the thing?</button>
             </div>
         </div>
@@ -87,6 +83,7 @@
         <MatDialog @bind-IsOpen="@menuHowDoTheThing">
             @if (smtpConfigured)
             {
+                <br />
                 <h5 class="horizontal-center noteworthy">Note: Emails will come from <span class="title">@Constants.Config.SMTPEmailFrom</span></h5>
                 <h5 class="horizontal-center noteworthy">Whitelist this email or check your spam folder if getting email alerts</h5>
                 <br />
@@ -190,6 +187,41 @@
                 <br />
             </EditForm>
         </MatDialog>
+
+        <h1 class="horizontal-center title">Alert Destinations</h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Alert Name</th>
+                    <th>Alert Type</th>
+                    <th>In Use</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var alertDest in Constants.SavedData.Alerts)
+                {
+                <tr>
+                    <td>@alertDest.AlertName</td>
+                    <td>@alertDest.AlertType</td>
+                    @if (AlertDestinationInUse(alertDest))
+                    {
+                        <td>True</td>
+                        <td>
+                            <button disabled class="btn btn-warning" @onclick="(() => DeleteAlertDest(alertDest, context))">Delete</button>
+                        </td>
+                    }
+                    else
+                    {
+                        <td>False</td>
+                        <td>
+                            <button class="btn btn-warning" @onclick="(() => DeleteAlertDest(alertDest, context))">Delete</button>
+                        </td>
+                    }
+                </tr>
+                }
+            </tbody>
+        </table>
 
         <h1 class="horizontal-center title">Watchers List</h1>
         <table class="table table-striped">
@@ -393,11 +425,13 @@
     private async Task OpenHowToDoTheThing()
     {
         menuHowDoTheThing = true;
+        await Task.CompletedTask;
     }
 
     private async Task CloseHowToDoTheThing()
     {
         menuHowDoTheThing = false;
+        await Task.CompletedTask;
     }
 
     private async Task ToggleWatcher(TrackedProduct product, AuthenticationState context)
@@ -423,6 +457,31 @@
         Constants.SavedData.TrackedProducts.Remove(product);
         SavedData.Save();
         StateHasChanged();
+        Toaster.CustomToast("Success", "Watcher deleted successfully", MatToastType.Success);
         await Task.CompletedTask;
+    }
+
+    private async Task DeleteAlertDest(Alert alertDest, AuthenticationState authState)
+    {
+        if (AlertDestinationInUse(alertDest))
+        {
+            Toaster.CustomToast("You Can't Do That", "This Alert is in use", MatToastType.Warning);
+        }
+        else
+        {
+            Log.Information("Deleting Alert Destination: ID[{AlertID}] Name[{AlertName}] Type[{AlertType}] | ChangingUser[{ChangingUser}]", alertDest.AlertID, alertDest.AlertName, alertDest.AlertType, authState.User.Identity.Name);
+            db.Add(new WatcherAudit { TrackerID = alertDest.AlertID, WatcherName = alertDest.AlertName, State = alertDest.AlertType.ToString(), ChangingUser = authState.User.Identity.Name });
+            await db.SaveChangesAsync();
+            Constants.SavedData.Alerts.Remove(alertDest);
+            SavedData.Save();
+            StateHasChanged();
+            Toaster.CustomToast("Success", "Alert Destination Deleted", MatToastType.Success);
+        }
+    }
+
+    private bool AlertDestinationInUse(Alert alertDestination)
+    {
+        var useCount = Constants.SavedData.TrackedProducts.FindAll(x => x.AlertDestination.AlertID == alertDestination.AlertID).Count;
+        return useCount >= 1;
     }
 }

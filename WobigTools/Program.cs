@@ -36,7 +36,9 @@ namespace WobigTools
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    //webBuilder.UseKestrel(opt => opt.ConfigureEndpoints());
+                    #if !DEBUG
+                    webBuilder.UseKestrel(opt => opt.ConfigureEndpoints());
+                    #endif
                 });
     }
 

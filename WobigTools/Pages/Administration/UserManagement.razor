@@ -11,8 +11,8 @@
 
 <AuthorizeView Roles="Admin, Moderator">
     <Authorized>
-        <h3 style="text-align: center">Current Users</h3>
-        <h5 style="text-align: center">Right click a user to edit</h5>
+        <h1 class="horizontal-center title">Current Users</h1>
+        <h5 class="horizontal-center noteworthy">Right click a user to edit</h5>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -45,6 +45,7 @@
             <Item OnClick="((e) => UnlockAccount(e, context))">Unlock Account</Item>
             @if (UserIsAdmin(context).Result)
             {
+                <Item OnClick="((e) => ForceConfirmEmail(e, context))">Force Confirm Email</Item>
                 <Item OnClick="((e) => ResetPassword(e, context))">Reset Password</Item>
                 <Item OnClick="((e) => DeleteUser(e, context))">Delete User</Item>
             }
@@ -212,11 +213,12 @@
     private async Task DeleteUser(ItemClickEventArgs e, AuthenticationState authState)
     {
         editingUser = e.Data as IdentityUser;
-        var deleteUser = await MatDialogService.ConfirmAsync($"Delete user {editingUser.Email}?");
+        var user = await _userManager.FindByNameAsync(editingUser.UserName);
+        var deleteUser = await MatDialogService.ConfirmAsync($"Delete user {user.Email}?");
         if (deleteUser)
         {
-            Log.Information("Deleting user: {EmailAddress} | ActionBy: {ActionUser}", editingUser.Email, authState.User.Identity.Name);
-            await _userManager.DeleteAsync(editingUser);
+            Log.Information("Deleting user: {EmailAddress} | ActionBy: {ActionUser}", user.Email, authState.User.Identity.Name);
+            await _userManager.DeleteAsync(user);
             Log.Information("User deleted successfully | ActionBy: {ActionUser}", authState.User.Identity.Name);
             Toaster.CustomToast("Success", "User was deleted successfully!", MatToastType.Success);
         }
@@ -226,29 +228,50 @@
     private async Task UnlockAccount(ItemClickEventArgs e, AuthenticationState authState)
     {
         editingUser = e.Data as IdentityUser;
-        Log.Information("Unlocking user: {EmailAddress} | ActionBy: {ActionUser}", editingUser.Email, authState.User.Identity.Name);
-        await _userManager.ResetAccessFailedCountAsync(editingUser);
-        Log.Information("Account unlocked: {EmailAddress} | ActionBy: {ActionUser}", editingUser.Email, authState.User.Identity.Name);
-        Toaster.CustomToast(editingUser.Email, "Account unlocked successfully!", MatToastType.Success);
+        var user = await _userManager.FindByNameAsync(editingUser.UserName);
+        Log.Information("Unlocking user: {EmailAddress} | ActionBy: {ActionUser}", user.Email, authState.User.Identity.Name);
+        await _userManager.ResetAccessFailedCountAsync(user);
+        Log.Information("Account unlocked: {EmailAddress} | ActionBy: {ActionUser}", user.Email, authState.User.Identity.Name);
+        Toaster.CustomToast(user.Email, "Account unlocked successfully!", MatToastType.Success);
         editingUser = new IdentityUser("empty");
     }
 
     private async Task ResetPassword(ItemClickEventArgs e, AuthenticationState authState)
     {
         editingUser = e.Data as IdentityUser;
+        var user = await _userManager.FindByNameAsync(editingUser.UserName);
         if (SMTPIsConfigured())
         {
-            Log.Debug("Resetting password for user: {EmailAddress} | ActionBy: {ActionUser}", authState.User.Identity.Name);
+            Log.Debug("Resetting password for user: {EmailAddress} | ActionBy: {ActionUser}", user.UserName, authState.User.Identity.Name);
             var newPassword = Generator.CreateRandomPassword(26);
-            var passToken = await _userManager.GeneratePasswordResetTokenAsync(editingUser);
-            await _userManager.ResetPasswordAsync(editingUser, passToken, newPassword);
-            await CoreLogicLib.Comm.Communication.SendEmailAsync("Password Reset", $"Your email has been reset to: {newPassword}{Environment.NewLine}Please login to your account using this password", new string[] { authState.User.Identity.Name });
-            Log.Information("Password reset for user: {EmailAddress} | ActionBy: {ActionUser}", authState.User.Identity.Name);
-            Toaster.CustomToast(editingUser.Email, "Password reset email sent successfully!", MatToastType.Success);
+            var passToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+            await _userManager.ResetPasswordAsync(user, passToken, newPassword);
+            await CoreLogicLib.Comm.Communication.SendEmailAsync("Password Reset", $"Your email has been reset to: {newPassword}{Environment.NewLine}Please login to your account using this password", new string[] { user.UserName });
+            Log.Information("Password reset for user: {EmailAddress} | ActionBy: {ActionUser}", user.UserName, authState.User.Identity.Name);
+            Toaster.CustomToast(user.Email, "Password reset email sent successfully!", MatToastType.Success);
         }
         else
         {
             Toaster.CustomToast("SMTP Failure", "SMTP Isn't configured, can't send email", MatToastType.Danger);
+        }
+        editingUser = new IdentityUser("empty");
+    }
+
+    private async Task ForceConfirmEmail(ItemClickEventArgs e, AuthenticationState authState)
+    {
+        editingUser = e.Data as IdentityUser;
+        var user = await _userManager.FindByNameAsync(editingUser.UserName);
+        if (await _userManager.IsEmailConfirmedAsync(user))
+        {
+            Toaster.CustomToast(user.Email, "Email already confirmed", MatToastType.Warning);
+        }
+        else
+        {
+            Log.Debug("Forcing email confirmation for user: {EmailAddress} | ActionBy: {ActionUser}", user.UserName, authState.User.Identity.Name);
+            var confirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            await _userManager.ConfirmEmailAsync(user, confirmToken);
+            Log.Information("Email confirmation forced for user: {EmailAddress} | ActionBy: {ActionUser}", user.UserName, authState.User.Identity.Name);
+            Toaster.CustomToast(user.Email, "Email confirmed successfully!", MatToastType.Success);
         }
         editingUser = new IdentityUser("empty");
     }
