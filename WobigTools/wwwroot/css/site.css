@@ -132,20 +132,26 @@ a, .btn-link {
         border-color: #121212;
     }
 
-        .btn-warning:not(:disabled):not(.disabled).active:focus,
-        .btn-warning.dropdown-toggle:focus {
-            box-shadow: none;
-        }
+    .btn-warning:not(:disabled):not(.disabled).active:focus,
+    .btn-warning.dropdown-toggle:focus {
+        box-shadow: none;
+    }
 
-input,
-.mdc-button_ripple {
-    color: #BB86FC;
-    background-color: #121212;
-    border: 1px solid;
-    border-radius: 8px;
-    border-color: #BB86FC;
-    box-shadow: none;
-}
+    .btn-warning.disabled, .btn-warning:disabled {
+        color: #8a0303;
+        background-color: #121212;
+        border-color: #8a0303;
+    }
+
+    input,
+    .mdc-button_ripple {
+        color: #BB86FC;
+        background-color: #121212;
+        border: 1px solid;
+        border-radius: 8px;
+        border-color: #BB86FC;
+        box-shadow: none;
+    }
 
     input:focus,
     input:focus-visible {

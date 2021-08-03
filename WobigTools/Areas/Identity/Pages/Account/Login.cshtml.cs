@@ -96,11 +96,6 @@ namespace WobigTools.Areas.Identity.Pages.Account
                     _logger.LogWarning("User account locked out.");
                     return RedirectToPage("./Lockout");
                 }
-                if (!(await _userManager.FindByEmailAsync(User.Identity.Name)).EmailConfirmed)
-                {
-                    ModelState.AddModelError(string.Empty, "This account's email hasn't been confirmed");
-                    return Page();
-                }
                 else
                 {
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
