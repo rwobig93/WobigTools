@@ -10,7 +10,7 @@
 @inject UserManager<IdentityUser> _userManager
 @inject RoleManager<IdentityRole> _roleManager
 @inject AuthenticationStateProvider AuthProvider
-@inject AppDbContext db
+@inject AppDbContext db 
 
 <AuthorizeView Roles="Admin">
     <Authorized>
@@ -102,26 +102,25 @@
         {
             CoreLogicLib.Standard.Core.InitializeWebTasks(MyHttpContext.AppBaseUrl);
         }
-        UpdateUserCount();
-        UpdateWatcherCounts();
-        UpdateDestinationCount();
+        //WobigToolsEvents.WatcherEventOccured += IndexAsyncHandler;
+        //WobigToolsEvents.WatcherAuditOccured += IndexAsyncHandler;
+        UpdateCounts();
         UpdateCharts();
     }
 
-    private void UpdateUserCount()
+    private void IndexAsyncHandler(object sender, object eventObject)
     {
-        userCount = _userManager.Users.Count();
+        UpdateCounts();
+        UpdateCharts();
+        StateHasChanged();
     }
 
-    private void UpdateWatcherCounts()
+    private void UpdateCounts()
     {
+        userCount = _userManager.Users.Count();
         watcherCount = Constants.SavedData.TrackedProducts.Count;
         checkCount = db.WatcherEvents.Count();
         alertCount = db.WatcherEvents.Where(x => x.Event == "Alert Trigger").Count();
-    }
-
-    private void UpdateDestinationCount()
-    {
         destCount = Constants.SavedData.Alerts.Count();
     }
 

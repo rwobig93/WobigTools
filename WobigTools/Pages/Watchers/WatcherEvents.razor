@@ -27,7 +27,7 @@
         <h1 class="horizontal-center title">Watcher Audit Logs</h1>
         <div class="horizontal-center">
             <button class="btn btn-primary" @onclick="DownloadAuditLog">Download Audit Log</button>
-        </div>
+        </div> 
         <br />
         <div class="textarea">
             @foreach (var auditEvent in db.WatcherAudits.OrderByDescending(x => x.TimeStamp).Take(100))
@@ -48,15 +48,13 @@
 @code {
     protected override void OnInitialized()
     {
-        base.OnInitialized();
+        //WobigToolsEvents.WatcherEventOccured += IndexAsyncHandler;
+        //WobigToolsEvents.WatcherAuditOccured += IndexAsyncHandler;
     }
 
-    private async void IndexAsyncHandler(object sender, object eventObject)
+    private void IndexAsyncHandler(object sender, object eventObject)
     {
-        await InvokeAsync(() =>
-        {
-            StateHasChanged();
-        });
+        StateHasChanged();
     }
 
     private async Task DownloadAuditLog()

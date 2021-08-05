@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using CoreLogicLib.Comm;
 using CoreLogicLib.Standard;
 using DataAccessLib.External;
@@ -11,7 +12,7 @@ namespace CoreLogicLib.Auto
 {
     public static class Watcher
     {
-        public static void CheckOnTrackers(TrackInterval interval)
+        public static async Task CheckOnTrackers(TrackInterval interval)
         {
             Log.Debug("Running Tracker Check: {Interval}", interval);
             foreach (TrackedProduct tracker in Constants.SavedData.TrackedProducts.FindAll(x => x.CheckInterval == interval))
@@ -19,7 +20,7 @@ namespace CoreLogicLib.Auto
                 if (tracker.Enabled)
                 {
                     Log.Verbose("Attempting to Run {Interval} Process: {Tracker}", interval, tracker.FriendlyName);
-                    ProcessAlertNeedOnTracker(tracker);
+                    await ProcessAlertNeedOnTracker(tracker);
                     Log.Verbose("Successfully Ran {Interval} Process: {Tracker}", interval, tracker.FriendlyName);
                 }
                 else
@@ -29,7 +30,7 @@ namespace CoreLogicLib.Auto
             }
         }
 
-        public static async void ProcessAlertNeedOnTracker(TrackedProduct tracker)
+        public static async Task ProcessAlertNeedOnTracker(TrackedProduct tracker)
         {
             try
             {
@@ -47,6 +48,21 @@ namespace CoreLogicLib.Auto
                     return;
                 }
 
+                var db = new AppDbContext();
+
+                var newWatcherEvent = new WatcherEvent
+                {
+                    AlertOnKeywordNotExist = tracker.AlertOnKeywordNotExist,
+                    AlertDestination = tracker.AlertDestination.AlertName,
+                    CheckInterval = tracker.CheckInterval.ToString(),
+                    Enabled = tracker.Enabled,
+                    FriendlyName = tracker.FriendlyName,
+                    Keyword = tracker.Keyword,
+                    PageURL = tracker.PageURL,
+                    TrackerID = tracker.TrackerID,
+                    Triggered = tracker.Triggered
+                };
+
                 if (attempt1.KeywordExists == attempt2.KeywordExists)
                 {
                     if ((attempt1.KeywordExists && !tracker.AlertOnKeywordNotExist) || (!attempt1.KeywordExists && tracker.AlertOnKeywordNotExist))
@@ -55,24 +71,10 @@ namespace CoreLogicLib.Auto
                         {
                             Log.Verbose("Alerting on tracker as logic matches", tracker, attempt1.KeywordExists);
                             ProcessAlertToSend(tracker);
-                            using var db = new AppDbContext();
-                            var newWatcherEvent = new WatcherEvent
-                            {
-                                Event = "Alert Trigger",
-                                AlertOnKeywordNotExist = tracker.AlertOnKeywordNotExist,
-                                AlertDestination = tracker.AlertDestination.AlertName,
-                                CheckInterval = tracker.CheckInterval.ToString(),
-                                Enabled = tracker.Enabled,
-                                FriendlyName = tracker.FriendlyName,
-                                Keyword = tracker.Keyword,
-                                PageURL = tracker.PageURL,
-                                TrackerID = tracker.TrackerID,
-                                Triggered = tracker.Triggered
-                            };
+                            newWatcherEvent.Event = "Alert Trigger";
                             db.Add(newWatcherEvent);
                             await db.SaveChangesAsync();
-                            //db.WatcherEventChanged(new EventArgs());
-                            //Constants.WatcherEvents.AddMessage($"Alert Triggered: {tracker.FriendlyName} | Keyword: {tracker.Keyword}");
+                            WobigToolsEvents.WatcherEventTrigger(new object(), "Alert Trigger");
                         }
                     }
                     else
@@ -81,45 +83,17 @@ namespace CoreLogicLib.Auto
                         {
                             Log.Verbose("Resetting on tracker as logatches", tracker, attempt1.KeywordExists);
                             ProcessAlertToReset(tracker);
-                            using var db = new AppDbContext();
-                            var newWatcherEvent = new WatcherEvent
-                            {
-                                Event = "Alert Reset",
-                                AlertOnKeywordNotExist = tracker.AlertOnKeywordNotExist,
-                                AlertDestination = tracker.AlertDestination.AlertName,
-                                CheckInterval = tracker.CheckInterval.ToString(),
-                                Enabled = tracker.Enabled,
-                                FriendlyName = tracker.FriendlyName,
-                                Keyword = tracker.Keyword,
-                                PageURL = tracker.PageURL,
-                                TrackerID = tracker.TrackerID,
-                                Triggered = tracker.Triggered
-                            };
+                            newWatcherEvent.Event = "Alert Reset";
                             db.Add(newWatcherEvent);
                             await db.SaveChangesAsync();
-                            //db.WatcherEventChanged(new EventArgs());
-                            //Constants.WatcherEvents.AddMessage($"Alert Reset: {tracker.FriendlyName} | Keyword: {tracker.Keyword}");
+                            WobigToolsEvents.WatcherEventTrigger(new object(), "Alert Reset");
                         }
                         else
                         {
-                            using var db = new AppDbContext();
-                            var newWatcherEvent = new WatcherEvent
-                            {
-                                Event = "Alert Checked",
-                                AlertOnKeywordNotExist = tracker.AlertOnKeywordNotExist,
-                                AlertDestination = tracker.AlertDestination.AlertName,
-                                CheckInterval = tracker.CheckInterval.ToString(),
-                                Enabled = tracker.Enabled,
-                                FriendlyName = tracker.FriendlyName,
-                                Keyword = tracker.Keyword,
-                                PageURL = tracker.PageURL,
-                                TrackerID = tracker.TrackerID,
-                                Triggered = tracker.Triggered
-                            };
+                            newWatcherEvent.Event = "Alert Checked";
                             db.Add(newWatcherEvent);
                             await db.SaveChangesAsync();
-                            //db.WatcherEventChanged(new EventArgs());
-                            //Constants.WatcherEvents.AddMessage($"Alert Checked: {tracker.FriendlyName} | Keyword: {tracker.Keyword}");
+                            WobigToolsEvents.WatcherEventTrigger(new object(), "Alert Checked");
                         }
                     }
                 }
@@ -127,24 +101,10 @@ namespace CoreLogicLib.Auto
                 {
                     Log.Verbose("Keyword found [{KWFound}] and Validation [{KWValidation}] don't match, not alerting", attempt1.KeywordExists, attempt2.KeywordExists);
                     Log.Information("Checked watcher for {TrackerName}, Keyword: {TrackerKeyword} | Alert not triggered", tracker.FriendlyName, tracker.Keyword);
-                    using var db = new AppDbContext();
-                    var newWatcherEvent = new WatcherEvent
-                    {
-                        Event = "Alert Checked",
-                        AlertOnKeywordNotExist = tracker.AlertOnKeywordNotExist,
-                        AlertDestination = tracker.AlertDestination.AlertName,
-                        CheckInterval = tracker.CheckInterval.ToString(),
-                        Enabled = tracker.Enabled,
-                        FriendlyName = tracker.FriendlyName,
-                        Keyword = tracker.Keyword,
-                        PageURL = tracker.PageURL,
-                        TrackerID = tracker.TrackerID,
-                        Triggered = tracker.Triggered
-                    };
+                    newWatcherEvent.Event = "Alert Checked";
                     db.Add(newWatcherEvent);
                     await db.SaveChangesAsync();
-                    //db.WatcherEventChanged(new EventArgs());
-                    //Constants.WatcherEvents.AddMessage($"Alert Checked: {tracker.FriendlyName} | Keyword: {tracker.Keyword}");
+                    WobigToolsEvents.WatcherEventTrigger(new object(), "Alert Checked");
                 }
             }
             catch (Exception ex)

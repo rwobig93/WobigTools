@@ -68,12 +68,9 @@
         Constants.DebugLog.AddMessage($"Adding a test string here! {Guid.NewGuid()}");
     }
 
-    private async void IndexAsyncHandler()
+    private void IndexAsyncHandler()
     {
-        await InvokeAsync(() =>
-        {
-            StateHasChanged();
-        });
+        StateHasChanged();
     }
 
     private async Task ToastBarage()

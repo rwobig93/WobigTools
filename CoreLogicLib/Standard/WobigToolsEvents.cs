@@ -5,15 +5,15 @@ namespace CoreLogicLib.Standard
 {
     public static class WobigToolsEvents
     {
-        public static event EventHandler<WatcherEvent> WatcherEventOccured;
-        public static event EventHandler<WatcherAudit> WatcherAuditOccured;
+        public static event EventHandler<string> WatcherEventOccured;
+        public static event EventHandler<string> WatcherAuditOccured;
 
-        public static void WatcherEventTrigger(object sender, WatcherEvent watcherEvent)
+        public static void WatcherEventTrigger(object sender = null, string watcherEvent = null)
         {
             WatcherEventOccured?.Invoke(sender, watcherEvent);
         }
 
-        public static void WatcherAuditTrigger(object sender, WatcherAudit watcherAudit)
+        public static void WatcherAuditTrigger(object sender = null, string watcherAudit = null)
         {
             WatcherAuditOccured?.Invoke(sender, watcherAudit);
         }
