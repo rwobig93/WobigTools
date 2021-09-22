@@ -5,6 +5,7 @@
 @using SharedLib.General
 @using MatBlazor
 @using CoreLogicLib.Standard
+@using CoreLogicLib.Comm
 
 @inject IMatToaster Toaster
 @inject IMatDialogService MatDialogService
@@ -357,6 +358,11 @@
             Toaster.CustomToast("You didn't pick an alert type!", "Warning", MatToastType.Warning);
             return;
         }
+        else if (!newAlert.Emails.Contains("@"))
+        {
+            Toaster.CustomToast("You didn't enter a valid email address!", "Warning", MatToastType.Warning);
+            return;
+        }
         else if (Constants.SavedData.Alerts.Find(x =>
         x.AlertType == AlertType.Email &&
         x.Emails == a.Emails) != null)
@@ -413,6 +419,34 @@
         }
         else
         {
+            try
+            {
+                WebCheck testCheck = await Web.WebCheckForKeyword(p.PageURL, p.Keyword);
+                if (testCheck == null)
+                {
+                    menuOpenWatcher = false;
+                    Toaster.CustomToast("Webpage Empty", "Webpage entered specified came back empty, please try again", MatToastType.Warning);
+                    await MatDialogService.AlertAsync("Webpage entered specified came back empty, please try again");
+                    return;
+                }
+                else if (!testCheck.KeywordExists && p.AlertOnKeywordNotExist)
+                {
+                    menuOpenWatcher = false;
+                    Toaster.CustomToast("Immediate Alert Trigger", "This alert would trigger immediately, are you sure you entered everything correctly?", MatToastType.Warning);
+                    var answer = await MatDialogService.AskAsync("This alert would trigger immediately, are you sure you entered everything correctly?", new string[] { "Yes", "No", "Maybe I did..." });
+                    if (answer != "Yes")
+                    {
+                        return;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                menuOpenWatcher = false;
+                Toaster.CustomToast("Webpage Error", ex.Message, MatToastType.Warning);
+                await MatDialogService.AlertAsync($"Error occured on this webpage: {Environment.NewLine}{ex.Message}");
+                return;
+            }
             Constants.SavedData.TrackedProducts.Add(p);
             SavedData.Save();
             Toaster.CustomToast($"Watcher {p.FriendlyName} created!", "Success", MatToastType.Success);

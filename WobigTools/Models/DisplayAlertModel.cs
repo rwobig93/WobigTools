@@ -15,7 +15,6 @@ namespace WobigTools.Models
         [Required]
         public int AlertType { get; set; } = -1;
         [Required]
-        [EmailAddress]
         public string Emails { get; set; }
         [Required]
         [Url]

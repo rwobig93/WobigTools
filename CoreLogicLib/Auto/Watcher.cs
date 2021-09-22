@@ -32,6 +32,21 @@ namespace CoreLogicLib.Auto
 
         public static async Task ProcessAlertNeedOnTracker(TrackedProduct tracker)
         {
+            AppDbContext db = new AppDbContext();
+
+            var newWatcherEvent = new WatcherEvent
+            {
+                AlertOnKeywordNotExist = tracker.AlertOnKeywordNotExist,
+                AlertDestination = tracker.AlertDestination.AlertName,
+                CheckInterval = tracker.CheckInterval.ToString(),
+                Enabled = tracker.Enabled,
+                FriendlyName = tracker.FriendlyName,
+                Keyword = tracker.Keyword,
+                PageURL = tracker.PageURL,
+                TrackerID = tracker.TrackerID,
+                Triggered = tracker.Triggered
+            };
+
             try
             {
                 Log.Verbose("Processing alert for tracker", tracker);
@@ -47,21 +62,6 @@ namespace CoreLogicLib.Auto
                     Log.Verbose("Attempt2 page is empty, not alerting");
                     return;
                 }
-
-                var db = new AppDbContext();
-
-                var newWatcherEvent = new WatcherEvent
-                {
-                    AlertOnKeywordNotExist = tracker.AlertOnKeywordNotExist,
-                    AlertDestination = tracker.AlertDestination.AlertName,
-                    CheckInterval = tracker.CheckInterval.ToString(),
-                    Enabled = tracker.Enabled,
-                    FriendlyName = tracker.FriendlyName,
-                    Keyword = tracker.Keyword,
-                    PageURL = tracker.PageURL,
-                    TrackerID = tracker.TrackerID,
-                    Triggered = tracker.Triggered
-                };
 
                 if (attempt1.KeywordExists == attempt2.KeywordExists)
                 {
@@ -81,7 +81,7 @@ namespace CoreLogicLib.Auto
                     {
                         if (tracker.Triggered)
                         {
-                            Log.Verbose("Resetting on tracker as logatches", tracker, attempt1.KeywordExists);
+                            Log.Verbose("Resetting on tracker as logic matches", tracker, attempt1.KeywordExists);
                             ProcessAlertToReset(tracker);
                             newWatcherEvent.Event = "Alert Reset";
                             db.Add(newWatcherEvent);
@@ -109,6 +109,11 @@ namespace CoreLogicLib.Auto
             }
             catch (Exception ex)
             {
+                newWatcherEvent.Event = "Alert Failure";
+                newWatcherEvent.Keyword = ex.Message;
+                db.Add(newWatcherEvent);
+                await db.SaveChangesAsync();
+                WobigToolsEvents.WatcherEventTrigger(new object(), "Alert Failure");
                 Log.Error("Error on tracker: [{Tracker}]{Error}", tracker.FriendlyName, ex.Message);
             }
         }

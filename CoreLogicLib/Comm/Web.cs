@@ -40,7 +40,7 @@ namespace CoreLogicLib.Comm
             }
         }
 
-        internal static async Task<WebCheck> WebCheckForKeyword(string pageURL, string keyword)
+        public static async Task<WebCheck> WebCheckForKeyword(string pageURL, string keyword)
         {
             if (HttpClient == null)
             {
@@ -75,9 +75,20 @@ namespace CoreLogicLib.Comm
                     WasCompressed = pageCompressed
                 };
             }
-            using var responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-            using var decompressedStream = new GZipStream(responseStream, CompressionMode.Decompress);
-            using var streamReader = new StreamReader(decompressedStream);
+            Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+            if (response.Content.Headers.ContentEncoding.ToString().ToLower().Contains("gzip"))
+            {
+                responseStream = new GZipStream(responseStream, CompressionMode.Decompress);
+            }
+            else if (response.Content.Headers.ContentEncoding.ToString().ToLower().Contains("deflate"))
+            {
+                responseStream = new DeflateStream(responseStream, CompressionMode.Decompress);
+            }
+            else
+            {
+                responseStream = new BrotliStream(responseStream, CompressionMode.Decompress);
+            }
+            using var streamReader = new StreamReader(responseStream);
             var stream = await streamReader.ReadToEndAsync();
             keywordFound = stream.Contains(keyword);
             Log.Verbose("Webpage Uncompressed: {WebpageUncompressed}", stream);
