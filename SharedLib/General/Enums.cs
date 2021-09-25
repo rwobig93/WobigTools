@@ -39,4 +39,10 @@
         Read,
         Write
     }
+
+    public enum HeadlessBrowserType
+    {
+        Local,
+        Remote
+    }
 }

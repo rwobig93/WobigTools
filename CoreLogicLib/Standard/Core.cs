@@ -165,6 +165,7 @@ namespace CoreLogicLib.Standard
             SaveEverything();
             Jobs.StopJobService();
             Comm.Web.Dispose();
+            Comm.WebHeadless.Dispose().RunSynchronously();
             Log.Information("==START-STOP== Application Stopped");
             Log.CloseAndFlush();
         }

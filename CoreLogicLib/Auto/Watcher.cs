@@ -14,13 +14,16 @@ namespace CoreLogicLib.Auto
     {
         public static async Task CheckOnTrackers(TrackInterval interval)
         {
-            Log.Debug("Running Tracker Check: {Interval}", interval);
+            var randomDelay = Generator.GetRandomNumberBetween(250, 1736);
+            Log.Debug("Running Tracker Check: {Interval} + RandomDelay({RandomDelay})", interval, randomDelay);
+            await Task.Delay(randomDelay);
             foreach (TrackedProduct tracker in Constants.SavedData.TrackedProducts.FindAll(x => x.CheckInterval == interval))
             {
                 if (tracker.Enabled)
                 {
                     Log.Verbose("Attempting to Run {Interval} Process: {Tracker}", interval, tracker.FriendlyName);
-                    await ProcessAlertNeedOnTracker(tracker);
+                    //await ProcessAlertNeedOnTracker(tracker);
+                    await ProcessAlertNeedOnTrackerHeadless(tracker);
                     Log.Verbose("Successfully Ran {Interval} Process: {Tracker}", interval, tracker.FriendlyName);
                 }
                 else
@@ -100,6 +103,88 @@ namespace CoreLogicLib.Auto
                 else
                 {
                     Log.Verbose("Keyword found [{KWFound}] and Validation [{KWValidation}] don't match, not alerting", attempt1.KeywordExists, attempt2.KeywordExists);
+                    Log.Information("Checked watcher for {TrackerName}, Keyword: {TrackerKeyword} | Alert not triggered", tracker.FriendlyName, tracker.Keyword);
+                    newWatcherEvent.Event = "Alert Checked";
+                    db.Add(newWatcherEvent);
+                    await db.SaveChangesAsync();
+                    WobigToolsEvents.WatcherEventTrigger(new object(), "Alert Checked");
+                }
+            }
+            catch (Exception ex)
+            {
+                newWatcherEvent.Event = "Alert Failure";
+                newWatcherEvent.Keyword = ex.Message;
+                db.Add(newWatcherEvent);
+                await db.SaveChangesAsync();
+                WobigToolsEvents.WatcherEventTrigger(new object(), "Alert Failure");
+                Log.Error("Error on tracker: [{Tracker}]{Error}", tracker.FriendlyName, ex.Message);
+            }
+        }
+
+        public static async Task ProcessAlertNeedOnTrackerHeadless(TrackedProduct tracker)
+        {
+            AppDbContext db = new AppDbContext();
+
+            var newWatcherEvent = new WatcherEvent
+            {
+                AlertOnKeywordNotExist = tracker.AlertOnKeywordNotExist,
+                AlertDestination = tracker.AlertDestination.AlertName,
+                CheckInterval = tracker.CheckInterval.ToString(),
+                Enabled = tracker.Enabled,
+                FriendlyName = tracker.FriendlyName,
+                Keyword = tracker.Keyword,
+                PageURL = tracker.PageURL,
+                TrackerID = tracker.TrackerID,
+                Triggered = tracker.Triggered
+            };
+
+            try
+            {
+                Log.Verbose("Processing alert for tracker", tracker);
+                WebCheck webCheckResponse = (await WebHeadless.WebCheckForKeyword(tracker.PageURL, tracker.Keyword));
+                if (webCheckResponse == null)
+                {
+                    Log.Verbose("webCheckResponse page is empty, not alerting");
+                    return;
+                }
+
+                if (webCheckResponse.KeywordExists)
+                {
+                    if ((webCheckResponse.KeywordExists && !tracker.AlertOnKeywordNotExist) || (!webCheckResponse.KeywordExists && tracker.AlertOnKeywordNotExist))
+                    {
+                        if (!tracker.Triggered)
+                        {
+                            Log.Verbose("Alerting on tracker as logic matches", tracker, webCheckResponse.KeywordExists);
+                            ProcessAlertToSend(tracker);
+                            newWatcherEvent.Event = "Alert Trigger";
+                            db.Add(newWatcherEvent);
+                            await db.SaveChangesAsync();
+                            WobigToolsEvents.WatcherEventTrigger(new object(), "Alert Trigger");
+                        }
+                    }
+                    else
+                    {
+                        if (tracker.Triggered)
+                        {
+                            Log.Verbose("Resetting on tracker as logic matches", tracker, webCheckResponse.KeywordExists);
+                            ProcessAlertToReset(tracker);
+                            newWatcherEvent.Event = "Alert Reset";
+                            db.Add(newWatcherEvent);
+                            await db.SaveChangesAsync();
+                            WobigToolsEvents.WatcherEventTrigger(new object(), "Alert Reset");
+                        }
+                        else
+                        {
+                            newWatcherEvent.Event = "Alert Checked";
+                            db.Add(newWatcherEvent);
+                            await db.SaveChangesAsync();
+                            WobigToolsEvents.WatcherEventTrigger(new object(), "Alert Checked");
+                        }
+                    }
+                }
+                else
+                {
+                    Log.Verbose("Keyword found [{KWFound}] and Validation [{KWValidation}] don't match, not alerting", webCheckResponse.KeywordExists, webCheckResponse.KeywordExists);
                     Log.Information("Checked watcher for {TrackerName}, Keyword: {TrackerKeyword} | Alert not triggered", tracker.FriendlyName, tracker.Keyword);
                     newWatcherEvent.Event = "Alert Checked";
                     db.Add(newWatcherEvent);

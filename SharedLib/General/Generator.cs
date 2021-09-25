@@ -39,5 +39,11 @@ namespace SharedLib.General
             }
             return new string(chars);
         }
+
+        public static int GetRandomNumberBetween(int startNumber, int endNumber)
+        {
+            Random random = new Random();
+            return random.Next(startNumber, endNumber);
+        }
     }
 }
