@@ -20,11 +20,11 @@ namespace CoreLogicLib.Comm
                         HeadlessBrowser = await Puppeteer.LaunchAsync(new LaunchOptions
                         {
                             Headless = true,
-                             Args = new string[]
-                             {
-                                "--no-sandbox",
-                                "--disable-setuid-sandbox"
-                             }
+                            Args = new string[]
+                            {
+                            "--no-sandbox",
+                            "--disable-setuid-sandbox"
+                            }
                         });
                         break;
                     case HeadlessBrowserType.Remote:
@@ -53,6 +53,7 @@ namespace CoreLogicLib.Comm
             }
 
             var newPage = await HeadlessBrowser.NewPageAsync();
+            await newPage.SetExtraHttpHeadersAsync(SharedLib.General.Generator.GetHttpHeadersToSend());
             var pageResponse = await newPage.GoToAsync(pageURL);
             var contents = await newPage.GetContentAsync();
             await newPage.DisposeAsync();

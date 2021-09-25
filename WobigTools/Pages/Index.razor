@@ -4,7 +4,7 @@
 @using Microsoft.AspNetCore.Identity
 @using Radzen
 @using Radzen.Blazor
-@using CoreLogicLib.Standard
+@using System.Threading
 
 @inject IMatToaster Toaster
 @inject UserManager<IdentityUser> _userManager
@@ -94,6 +94,7 @@
     private int checkCount = 0;
     private int destCount = 0;
     private List<ChartValue> chartValues = new List<ChartValue>();
+    private Timer timer;
 
     protected override void OnInitialized()
     {
@@ -102,10 +103,14 @@
         {
             CoreLogicLib.Standard.Core.InitializeWebTasks(MyHttpContext.AppBaseUrl);
         }
-        //WobigToolsEvents.WatcherEventOccured += IndexAsyncHandler;
-        //WobigToolsEvents.WatcherAuditOccured += IndexAsyncHandler;
         UpdateCounts();
         UpdateCharts();
+        //timer = new Timer(async _ =>
+        //{
+        //    UpdateCounts();
+        //    UpdateCharts();
+        //    await InvokeAsync(StateHasChanged);
+        //}, null, 0, 1000);
     }
 
     private void IndexAsyncHandler(object sender, object eventObject)

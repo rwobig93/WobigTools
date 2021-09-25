@@ -7,6 +7,7 @@ namespace WobigTools.Models
 {
     public class DisplayTrackedProductModel
     {
+        public Guid TrackerID { get; set; }
         [Required]
         [StringLength(25, ErrorMessage = "Friendly Name is too long.")]
         [MinLength(1, ErrorMessage = "Friendly Name is too short.")]

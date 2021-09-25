@@ -229,7 +229,8 @@ namespace CoreLogicLib.Auto
                     Communication.SendAlertWebhookDiscord(tracker, _color: "2813191");
                     break;
                 case AlertType.Email_Webhook:
-                    Log.Warning("Processed Alert Type Webhook + Email when it isn't implemented yet", tracker);
+                    Communication.SendAlertEmail(tracker);
+                    Communication.SendAlertWebhookDiscord(tracker, _color: "2813191");
                     break;
             }
         }

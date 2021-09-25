@@ -42,5 +42,10 @@
     <script src="~/customjs/UnauthorizedAnimated.js"></script>
     <script src="~/customjs/DownloadFiles.js"></script>
     <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
+    <script>
+       Blazor.defaultReconnectionHandler._reconnectCallback = function(d) {
+            document.location.reload();
+       }
+    </script>
 </body>
 </html>

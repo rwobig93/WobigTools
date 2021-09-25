@@ -6,14 +6,15 @@
 @using MatBlazor
 @using CoreLogicLib.Standard
 @using CoreLogicLib.Comm
+@using BlazorContextMenu
 
 @inject IMatToaster Toaster
 @inject IMatDialogService MatDialogService
-@inject AppDbContext db 
+@inject AppDbContext db
 
 <AuthorizeView Roles="WatcherList, Admin">
     <Authorized>
-        <h1 class="horizontal-center title">Options</h1>
+        <h2 class="horizontal-center title">Options</h2>
         <div class="row">
             <div class="col text-center">
                 <button Class="btn btn-primary" @onclick="@OpenAddAlertDestination">Add Alert Destination</button>
@@ -82,6 +83,75 @@
             </EditForm>
         </MatDialog>
 
+        <MatDialog @bind-IsOpen="@menuWatcherEdit">
+            <EditForm Context="formContext" Model="@editProduct" OnValidSubmit="@EditWatcher">
+                <ChildContent Context="editContext">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                    <table class="table" width="95%">
+                        <tbody>
+                            <tr>
+                                <td width="90%">
+                                    <MatTextField Label="Friendly Name" @bind-Value="editProduct.FriendlyName" TValue="string" Required="true" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="90%">
+                                    <MatTextField Label="Page URL" @bind-Value="editProduct.PageURL" TValue="string" Required="true" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="90%">
+                                    <MatTooltip Context="tooltip" Tooltip="Must match page source, right click on desired page > Inspect to see real value">
+                                        <MatTextField RefBack="@tooltip" Label="Keywords" @bind-Value="editProduct.Keyword" TValue="string" Required="true" />
+                                    </MatTooltip>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="90%">
+                                    <div>Enabled:</div>
+                                    <div>
+                                        <MatRadioGroup @bind-Value="@editProduct.Enabled" TValue="bool">
+                                            <MatRadioButton Value="@true" TValue="bool">True</MatRadioButton>
+                                            <MatRadioButton Value="@false" TValue="bool">False</MatRadioButton>
+                                        </MatRadioGroup>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="90%">
+                                    <div>Alert When:</div>
+                                    <div>
+                                        <MatRadioGroup @bind-Value="@editProduct.AlertOnKeywordNotExist" TValue="bool">
+                                            <MatRadioButton Value="@true" TValue="bool">Keywords Don't Exist</MatRadioButton>
+                                            <MatRadioButton Value="@false" TValue="bool">Keywords Exist</MatRadioButton>
+                                        </MatRadioGroup>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="90%">
+                                    <MatSelect Label="Alert Destination" @bind-Value="@editProduct.AlertDestinationID">
+                                        @foreach (var alertDest in Constants.SavedData.Alerts)
+                                        {
+                                            <MatOption Value="@alertDest.AlertID">@alertDest.AlertName (@alertDest.AlertType.ToString())</MatOption>
+                                        }
+                                    </MatSelect>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="row" style="width: 95%;">
+                        <div class="col text-center">
+                            <button class="btn btn-warning" @onclick="CloseWatcherEdit">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Update Watcher</button>
+                        </div>
+                    </div>
+                    <br />
+                </ChildContent>
+            </EditForm>
+        </MatDialog>
+
         <MatDialog @bind-IsOpen="@menuHowDoTheThing">
             @if (smtpConfigured)
             {
@@ -94,10 +164,99 @@
             <h3 class="horizontal-center noteworthy">2. Create a watcher for a webpage or product page</h3>
             <h3 class="horizontal-center noteworthy">3. Profit!</h3>
             <br />
+            <h3 class="horizontal-center noteworthy">Note: You cannot delete an alert destination if it is in use</h3>
+            <br />
             <div class="horizontal-center">
                 <button class="btn btn-primary" @onclick="CloseHowToDoTheThing">Ok, Got it</button>
             </div>
             <br />
+        </MatDialog>
+
+        <MatDialog @bind-IsOpen="@menuEditAlerts">
+            <EditForm Context="formContext" Model="@editAlert" OnValidSubmit="@EditAlertDestination">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <table class="table" width="90%">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <MatTextField Label="Alert Name" @bind-Value="editAlert.AlertName" TValue="string" Required="true"></MatTextField>
+                            </td>
+                            <td>
+                                <MatSelect Label="Alert Destination" @bind-Value="@editAlert.AlertType">
+                                    <MatOption Value="0">Email</MatOption>
+                                    <MatOption Value="1">Discord</MatOption>
+                                    <MatOption Value="2">Email And Discord</MatOption>
+                                </MatSelect>
+                            </td>
+                        </tr>
+                        @if (editAlert.AlertType == 0)
+                        {
+                            <tr>
+                                <td width="90%">
+                                    <MatTooltip Context="tooltip" Tooltip="Seperate multiple emails with a ;">
+                                        <MatTextField RefBack="@tooltip" Label="Email(s)" Style="width: 90% !important;" @bind-Value="editAlert.Emails" TValue="string" Required="true"></MatTextField>
+                                    </MatTooltip>
+                                </td>
+                            </tr>
+                        }
+                        @if (editAlert.AlertType == 1)
+                        {
+                            <tr>
+                                <td width="45%">
+                                    <MatTextField Label="Discord Webhook URL" @bind-Value="editAlert.WebHookURL" />
+                                </td>
+                                <td width="35%">
+                                    <MatTooltip Context="tooltip" Tooltip="Discord ID only, no <&> or @@">
+                                        <MatTextField RefBack="@tooltip" Label="Discord Mention ID" @bind-Value="editAlert.MentionString" />
+                                    </MatTooltip>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                                <td class="horizontal-center">
+                                    <MatButtonLink Target="_blank" Href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-">How to find a Discord ID</MatButtonLink>
+                                </td>
+                            </tr>
+                        }
+                        @if (editAlert.AlertType == 2)
+                        {
+                            <tr>
+                                <td width="90%">
+                                    <MatTooltip Context="tooltip" Tooltip="Seperate multiple emails with a ;">
+                                        <MatTextField RefBack="@tooltip" Label="Email(s)" Style="width: 90% !important;" @bind-Value="editAlert.Emails" TValue="string" Required="true"></MatTextField>
+                                    </MatTooltip>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="45%">
+                                    <MatTextField Label="Discord Webhook URL" @bind-Value="editAlert.WebHookURL" />
+                                </td>
+                                <td width="45%">
+                                    <MatTooltip Context="tooltip" Tooltip="Discord ID only, no <&> or @@">
+                                        <MatTextField RefBack="@tooltip" Label="Discord Mention ID" @bind-Value="editAlert.MentionString" />
+                                    </MatTooltip>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                                <td class="horizontal-center">
+                                    <MatButtonLink Target="_blank" Href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-">How to find a Discord ID</MatButtonLink>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <div class="row" style="width: 95%;">
+                    <div class="col text-center">
+                        <button class="btn btn-warning" @onclick="CloseAlertDestEdit">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Alert</button>
+                    </div>
+                </div>
+                <br />
+            </EditForm>
         </MatDialog>
 
         <MatDialog @bind-IsOpen="@menuOpenAlerts">
@@ -190,42 +349,44 @@
             </EditForm>
         </MatDialog>
 
-        <h1 class="horizontal-center title">Alert Destinations</h1>
+        <h2 class="horizontal-center title">Alert Destinations</h2>
+        <h5 class="horizontal-center noteworthy">Right click an alert to edit</h5>
         <table class="table table-striped">
             <thead>
                 <tr>
                     <th>Alert Name</th>
                     <th>Alert Type</th>
                     <th>In Use</th>
-                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var alertDest in Constants.SavedData.Alerts)
                 {
-                <tr>
-                    <td>@alertDest.AlertName</td>
-                    <td>@alertDest.AlertType</td>
-                    @if (AlertDestinationInUse(alertDest))
-                    {
-                        <td>True</td>
-                        <td>
-                            <button disabled class="btn btn-warning" @onclick="(() => DeleteAlertDest(alertDest, context))">Delete</button>
-                        </td>
-                    }
-                    else
-                    {
-                        <td>False</td>
-                        <td>
-                            <button class="btn btn-warning" @onclick="(() => DeleteAlertDest(alertDest, context))">Delete</button>
-                        </td>
-                    }
-                </tr>
+                    <ContextMenuTrigger WrapperTag="tr" MenuId="alertDestination" Data="alertDest">
+                        <td>@alertDest.AlertName</td>
+                        <td>@alertDest.AlertType</td>
+                        @if (AlertDestinationInUse(alertDest))
+                        {
+                            <td>True</td>
+                        }
+                        else
+                        {
+                            <td>False</td>
+                        }
+                    </ContextMenuTrigger>
                 }
             </tbody>
         </table>
+        <ContextMenu Id="alertDestination" Context="menuContext">
+            <Item OnClick="((e) => OpenAlertDestEdit(((Alert)e.Data)))">Edit</Item>
+            @if (AlertDestinationInUse(((Alert)menuContext.Data)))
+                { <Item Enabled="@false">Delete</Item> }
+            else
+                { <Item OnClick="((e) => DeleteAlertDest(((Alert)e.Data), context))">Delete</Item> }
+        </ContextMenu>
 
-        <h1 class="horizontal-center title">Watchers List</h1>
+        <h2 class="horizontal-center title">Watchers List</h2>
+        <h5 class="horizontal-center noteworthy">Right click a watcher to edit</h5>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -234,31 +395,29 @@
                     <th>Keyword</th>
                     <th>Check Interval</th>
                     <th>Page URL</th>
-                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var product in Constants.SavedData.TrackedProducts)
                 {
-                    <tr>
+                    <ContextMenuTrigger WrapperTag="tr" MenuId="watcherEdit" Data="product">
                         <td>@product.FriendlyName</td>
                         <td>@product.Enabled</td>
                         <td>@product.Keyword</td>
                         <td>@product.CheckInterval</td>
                         <td><a href="@product.PageURL" target="_blank">@product.PageURL</a></td>
-                        <td>
-                            <button class="btn btn-secondary" @onclick="(() => ToggleWatcher(product, context))">
-                                @if (product.Enabled)
-                                {<div>Disable</div> }
-                                else
-                                { <div>Enable</div>}
-                            </button>
-                            <button class="btn btn-warning" @onclick="(() => DeleteWatcher(product, context))">Delete</button>
-                        </td>
-                    </tr>
+                    </ContextMenuTrigger>
                 }
             </tbody>
         </table>
+        <ContextMenu Id="watcherEdit" Context="menuContext">
+            @if (((TrackedProduct)menuContext.Data).Enabled)
+            {<Item OnClick="((e) => ToggleWatcher(((TrackedProduct)e.Data), context))">Disable</Item> }
+            else
+            { <Item OnClick="((e) => ToggleWatcher(((TrackedProduct)e.Data), context))">Enable</Item>}
+            <Item OnClick="((e) => OpenWatcherEdit(((TrackedProduct)e.Data)))">Edit</Item>
+            <Item OnClick="((e) => DeleteWatcher(((TrackedProduct)e.Data), context))">Delete</Item>
+        </ContextMenu>
     </Authorized>
     <NotAuthorized>
         <WobigTools.Pages.Auth.Unauthorized />
@@ -272,10 +431,14 @@
 
 @code {
     private DisplayTrackedProductModel newProduct = new DisplayTrackedProductModel();
+    private DisplayTrackedProductModel editProduct = new DisplayTrackedProductModel();
     private DisplayAlertModel newAlert = new DisplayAlertModel();
+    private DisplayAlertModel editAlert = new DisplayAlertModel();
     private bool menuOpenAlerts = false;
     private bool menuOpenWatcher = false;
     private bool menuHowDoTheThing = false;
+    private bool menuEditAlerts = false;
+    private bool menuWatcherEdit = false;
     private bool smtpConfigured = false;
     private bool validationAsked = false;
 
@@ -396,6 +559,43 @@
         await Task.CompletedTask;
     }
 
+    private async Task EditAlertDestination()
+    {
+        Alert editingAlert = Constants.SavedData.Alerts.Find(x => x.AlertID == editAlert.AlertID);
+
+        if (editAlert is null)
+        {
+            Toaster.CustomToast("Editing alert wasn't found!", "Warning", MatToastType.Warning);
+            return;
+        }
+        else if (editAlert.AlertType == -1)
+        {
+            Toaster.CustomToast("You didn't pick an alert type!", "Warning", MatToastType.Warning);
+            return;
+        }
+        else if (!editAlert.Emails.Contains("@"))
+        {
+            Toaster.CustomToast("You didn't enter a valid email address!", "Warning", MatToastType.Warning);
+            return;
+        }
+        else
+        {
+            editingAlert.AlertName = editAlert.AlertName;
+            editingAlert.AlertType = (AlertType)editAlert.AlertType;
+            editingAlert.Emails = editAlert.Emails.Split(';').ToList();
+            editingAlert.MentionString = editAlert.MentionString;
+            editingAlert.WebHookURL = editAlert.WebHookURL;
+
+            SavedData.Save();
+            Toaster.CustomToast($"Alert {editingAlert.AlertName} updated!", "Success", MatToastType.Success);
+            Log.Information("Alert destination updated: {AlertID} | {AlertName} | {AlertType}", editingAlert.AlertID, editingAlert.AlertName, editingAlert.AlertType);
+
+            editAlert = new DisplayAlertModel();
+            menuEditAlerts = false;
+        }
+        await Task.CompletedTask;
+    }
+
     private async Task AddWatcher()
     {
         if (Constants.SavedData.Alerts.Find(x => x.AlertID == newProduct.AlertDestinationID) == null)
@@ -422,16 +622,20 @@
         {
             try
             {
+                Toaster.CustomToast("Verifying...", "Verifying provided webpage...", MatToastType.Info);
                 WebCheck testCheck = await WebHeadless.WebCheckForKeyword(p.PageURL, p.Keyword);
                 if (testCheck == null)
                 {
-                    menuOpenWatcher = false;
                     Toaster.CustomToast("Webpage Empty", "Webpage entered specified came back empty, please try again", MatToastType.Warning);
+                    return;
+                }
+                else if (testCheck.ResponseCode != System.Net.HttpStatusCode.OK)
+                {
+                    Toaster.CustomToast("Webpage Error Code Returned", $"Webpage returned error: {testCheck.ResponseCode}", MatToastType.Warning);
                     return;
                 }
                 else if (!testCheck.KeywordExists && p.AlertOnKeywordNotExist)
                 {
-                    menuOpenWatcher = false;
                     Toaster.CustomToast("This alert would trigger immediately", "If you are sure this is correct click create again", MatToastType.Warning);
                     if (!validationAsked)
                     {
@@ -443,7 +647,6 @@
             }
             catch (Exception ex)
             {
-                menuOpenWatcher = false;
                 Toaster.CustomToast("Webpage Error", ex.Message, MatToastType.Warning);
                 return;
             }
@@ -453,6 +656,63 @@
 
             newProduct = new DisplayTrackedProductModel();
             menuOpenWatcher = false;
+        }
+        await Task.CompletedTask;
+    }
+
+    private async Task EditWatcher()
+    {
+        TrackedProduct editingWatcher = Constants.SavedData.TrackedProducts.Find(x => x.TrackerID == editProduct.TrackerID);
+
+        if (editingWatcher is null)
+        {
+            Toaster.CustomToast("Editing watcher wasn't found!", "Warning", MatToastType.Warning);
+            return;
+        }
+        else
+        {
+            try
+            {
+                Toaster.CustomToast("Verifying...", "Verifying provided webpage...", MatToastType.Info);
+                WebCheck testCheck = await WebHeadless.WebCheckForKeyword(editProduct.PageURL, editProduct.Keyword);
+                if (testCheck == null)
+                {
+                    Toaster.CustomToast("Webpage Empty", "Webpage entered specified came back empty, please try again", MatToastType.Warning);
+                    return;
+                }
+                else if (testCheck.ResponseCode != System.Net.HttpStatusCode.OK)
+                {
+                    Toaster.CustomToast("Webpage Error Code Returned", $"Webpage returned error: {testCheck.ResponseCode}", MatToastType.Warning);
+                    return;
+                }
+                else if (!testCheck.KeywordExists && editProduct.AlertOnKeywordNotExist)
+                {
+                    Toaster.CustomToast("This alert would trigger immediately", "If you are sure this is correct click create again", MatToastType.Warning);
+                    if (!validationAsked)
+                    {
+                        validationAsked = true;
+                        return;
+                    }
+                    validationAsked = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Toaster.CustomToast("Webpage Error", ex.Message, MatToastType.Warning);
+                return;
+            }
+            editingWatcher.FriendlyName = editProduct.FriendlyName;
+            editingWatcher.AlertDestination = Constants.SavedData.Alerts.Find(x => x.AlertID == editProduct.AlertDestinationID);
+            editingWatcher.AlertOnKeywordNotExist = editProduct.AlertOnKeywordNotExist;
+            editingWatcher.Enabled = editProduct.Enabled;
+            editingWatcher.Keyword = editProduct.Keyword;
+            editingWatcher.PageURL = editProduct.PageURL;
+
+            SavedData.Save();
+            Toaster.CustomToast($"Watcher {editingWatcher.FriendlyName} updated!", "Success", MatToastType.Success);
+
+            editProduct = new DisplayTrackedProductModel();
+            menuWatcherEdit = false;
         }
         await Task.CompletedTask;
     }
@@ -515,5 +775,50 @@
     {
         var useCount = Constants.SavedData.TrackedProducts.FindAll(x => x.AlertDestination.AlertID == alertDestination.AlertID).Count;
         return useCount >= 1;
+    }
+
+    private async Task OpenAlertDestEdit(Alert alertDestination)
+    {
+        editAlert = new DisplayAlertModel()
+        {
+            AlertID = alertDestination.AlertID,
+            AlertName = alertDestination.AlertName,
+            AlertType = (int)alertDestination.AlertType,
+            Emails = string.Join(";", alertDestination.Emails),
+            MentionString = alertDestination.MentionString,
+            WebHookURL = alertDestination.WebHookURL
+        };
+        menuEditAlerts = true;
+        await Task.CompletedTask;
+    }
+
+    private async Task CloseAlertDestEdit()
+    {
+        editAlert = new DisplayAlertModel();
+        menuEditAlerts = false;
+        await Task.CompletedTask;
+    }
+
+    private async Task OpenWatcherEdit(TrackedProduct product)
+    {
+        editProduct = new DisplayTrackedProductModel()
+        {
+            TrackerID = product.TrackerID,
+            FriendlyName = product.FriendlyName,
+            PageURL = product.PageURL,
+            Keyword = product.Keyword,
+            AlertOnKeywordNotExist = product.AlertOnKeywordNotExist,
+            Enabled = product.Enabled,
+            AlertDestinationID = product.AlertDestination.AlertID
+        };
+        menuWatcherEdit = true;
+        await Task.CompletedTask;
+    }
+
+    private async Task CloseWatcherEdit()
+    {
+        editProduct = new DisplayTrackedProductModel();
+        menuWatcherEdit = false;
+        await Task.CompletedTask;
     }
 }

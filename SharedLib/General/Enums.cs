@@ -17,9 +17,9 @@
 
     public enum AlertType
     {
-        Email,
-        Webhook,
-        Email_Webhook
+        Email = 0,
+        Webhook = 1,
+        Email_Webhook = 2
     }
 
     public enum TrackInterval

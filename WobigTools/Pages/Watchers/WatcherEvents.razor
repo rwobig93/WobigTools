@@ -52,6 +52,8 @@
 
     protected override void OnInitialized()
     {
+        dbWatcherEvents = db.WatcherEvents.OrderByDescending(x => x.TimeStamp).Take(100);
+        dbWatcherAudits = db.WatcherAudits.OrderByDescending(x => x.TimeStamp).Take(100);
         timer = new Timer(async _ =>
         {
             dbWatcherEvents = db.WatcherEvents.OrderByDescending(x => x.TimeStamp).Take(100);
