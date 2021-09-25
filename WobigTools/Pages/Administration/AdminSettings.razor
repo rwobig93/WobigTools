@@ -9,22 +9,23 @@
 @inject UserManager<IdentityUser> _userManager
 @inject RoleManager<IdentityRole> _roleManager
 
-<AuthorizeView Roles="Admin, Moderator">
-    <Authorized>
-        <SMTPSettings />
-        <br />
-        <WobigTools.Pages.Administration.UserManagement />
-    </Authorized>
-    <NotAuthorized>
-        <WobigTools.Pages.Auth.Unauthorized />
-    </NotAuthorized>
-</AuthorizeView>
-<AuthorizeView>
-    <NotAuthorized>
-        <WobigTools.Pages.Auth.NotLoggedIn />
-    </NotAuthorized>
-</AuthorizeView>
+    <AuthorizeView Roles="Admin, Moderator">
+        <Authorized>
+            <SMTPSettings />
+            <br />
+            <WobigTools.Pages.Administration.UserManagement />
+            <h4 class="horizontal-center title">WobigTools Full Version: @currentVersion</h4>
+        </Authorized>
+        <NotAuthorized>
+            <WobigTools.Pages.Auth.Unauthorized />
+        </NotAuthorized>
+    </AuthorizeView>
+    <AuthorizeView>
+        <NotAuthorized>
+            <WobigTools.Pages.Auth.NotLoggedIn />
+        </NotAuthorized>
+    </AuthorizeView>
 
-@code {
-
-}
+    @code {
+        private string currentVersion = $"{SharedLib.IO.OSDynamic.GetRunningVersion(AssemblyType.Entry)}";
+    }

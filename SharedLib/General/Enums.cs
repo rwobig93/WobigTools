@@ -45,4 +45,10 @@
         Local,
         Remote
     }
+
+    public enum AssemblyType
+    {
+        Entry,
+        Executing
+    }
 }

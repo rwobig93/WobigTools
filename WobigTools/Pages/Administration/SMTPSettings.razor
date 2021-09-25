@@ -7,7 +7,7 @@
 
 <AuthorizeView Roles="Admin">
     <Authorized>
-        <h1 class="horizontal-center title">SMTP Settings for Email</h1>
+        <h2 class="horizontal-center title">SMTP Settings for Email</h2>
         <EditForm Model="@settingsSMTP" OnValidSubmit="@SetSMTPSettings">
             <ChildContent Context="editContext">
                 <DataAnnotationsValidator />
@@ -51,7 +51,7 @@
         <br />
         <div class="bottom-border" />
         <br />
-        <h1 class="horizontal-center title">Test SMTP</h1>
+        <h2 class="horizontal-center title">Test SMTP</h2>
         <table class="table">
             <tbody>
                 <tr>

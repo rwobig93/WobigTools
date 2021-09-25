@@ -245,7 +245,7 @@
                         <td>@product.Enabled</td>
                         <td>@product.Keyword</td>
                         <td>@product.CheckInterval</td>
-                        <td>@product.PageURL</td>
+                        <td><a href="@product.PageURL" target="_blank">@product.PageURL</a></td>
                         <td>
                             <button class="btn btn-secondary" @onclick="(() => ToggleWatcher(product, context))">
                                 @if (product.Enabled)
@@ -277,6 +277,7 @@
     private bool menuOpenWatcher = false;
     private bool menuHowDoTheThing = false;
     private bool smtpConfigured = false;
+    private bool validationAsked = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -421,30 +422,29 @@
         {
             try
             {
-                WebCheck testCheck = await Web.WebCheckForKeyword(p.PageURL, p.Keyword);
+                WebCheck testCheck = await WebHeadless.WebCheckForKeyword(p.PageURL, p.Keyword);
                 if (testCheck == null)
                 {
                     menuOpenWatcher = false;
                     Toaster.CustomToast("Webpage Empty", "Webpage entered specified came back empty, please try again", MatToastType.Warning);
-                    await MatDialogService.AlertAsync("Webpage entered specified came back empty, please try again");
                     return;
                 }
                 else if (!testCheck.KeywordExists && p.AlertOnKeywordNotExist)
                 {
                     menuOpenWatcher = false;
-                    Toaster.CustomToast("Immediate Alert Trigger", "This alert would trigger immediately, are you sure you entered everything correctly?", MatToastType.Warning);
-                    var answer = await MatDialogService.AskAsync("This alert would trigger immediately, are you sure you entered everything correctly?", new string[] { "Yes", "No", "Maybe I did..." });
-                    if (answer != "Yes")
+                    Toaster.CustomToast("This alert would trigger immediately", "If you are sure this is correct click create again", MatToastType.Warning);
+                    if (!validationAsked)
                     {
+                        validationAsked = true;
                         return;
                     }
+                    validationAsked = false;
                 }
             }
             catch (Exception ex)
             {
                 menuOpenWatcher = false;
                 Toaster.CustomToast("Webpage Error", ex.Message, MatToastType.Warning);
-                await MatDialogService.AlertAsync($"Error occured on this webpage: {Environment.NewLine}{ex.Message}");
                 return;
             }
             Constants.SavedData.TrackedProducts.Add(p);

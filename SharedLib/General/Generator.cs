@@ -26,7 +26,7 @@ namespace SharedLib.General
             // Create a string of characters, numbers, special characters that allowed in the password  
             string validChars = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
             Random random = new Random();
-
+            
             // Minimum size 8. Max size is number of all allowed chars.  
             int size = random.Next(8, validChars.Length);
 

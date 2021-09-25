@@ -60,9 +60,19 @@ namespace SharedLib.IO
             };
         }
 
-        public static Version GetRunningVersion()
+        public static Version GetRunningVersion(AssemblyType assemblyType = AssemblyType.Executing)
         {
-            return Assembly.GetExecutingAssembly().GetName().Version;
+            Version currentVersion = new Version("0.0.0.0");
+            switch (assemblyType)
+            {
+                case AssemblyType.Entry:
+                    currentVersion = Assembly.GetEntryAssembly().GetName().Version;
+                    break;
+                case AssemblyType.Executing:
+                    currentVersion = Assembly.GetExecutingAssembly().GetName().Version;
+                    break;
+            }
+            return currentVersion;
         }
 
         public static string GetConfigPath()

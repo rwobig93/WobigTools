@@ -1,6 +1,6 @@
 ﻿@page "/Watchers/Events"
 @using System.Text
-@using CoreLogicLib.Standard 
+@using System.Threading 
 
 @inject IJSRuntime JSRuntime
 @inject AppDbContext db
@@ -9,7 +9,7 @@
     <Authorized>
         <h1 class="horizontal-center title">Watcher Events</h1>
         <div class="textarea">
-            @foreach (var watcherEvent in db.WatcherEvents.OrderByDescending(x => x.TimeStamp).Take(100))
+            @foreach (var watcherEvent in dbWatcherEvents)
             {
                 <div class="display-message">@watcherEvent.TimeStamp :: @watcherEvent.Event: @watcherEvent.FriendlyName | Keyword(s): @watcherEvent.Keyword</div>
             }
@@ -30,7 +30,7 @@
         </div> 
         <br />
         <div class="textarea">
-            @foreach (var auditEvent in db.WatcherAudits.OrderByDescending(x => x.TimeStamp).Take(100))
+            @foreach (var auditEvent in dbWatcherAudits)
             {
                 <div class="display-message">@auditEvent.TimeStamp :: Name[@auditEvent.WatcherName] State[@auditEvent.State] User[@auditEvent.ChangingUser]</div>
             }
@@ -46,10 +46,23 @@
 </AuthorizeView>
 
 @code {
+    IQueryable<WatcherEvent> dbWatcherEvents;
+    IQueryable<WatcherAudit> dbWatcherAudits;
+    Timer timer;
+
     protected override void OnInitialized()
     {
-        //WobigToolsEvents.WatcherEventOccured += IndexAsyncHandler;
-        //WobigToolsEvents.WatcherAuditOccured += IndexAsyncHandler;
+        timer = new Timer(async _ =>
+        {
+            dbWatcherEvents = db.WatcherEvents.OrderByDescending(x => x.TimeStamp).Take(100);
+            dbWatcherAudits = db.WatcherAudits.OrderByDescending(x => x.TimeStamp).Take(100);
+            await InvokeAsync(StateHasChanged);
+        }, null, 0, 500);
+    }
+
+    public void Dispose()
+    {
+        timer?.Dispose();
     }
 
     private void IndexAsyncHandler(object sender, object eventObject)
