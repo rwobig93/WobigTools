@@ -22,8 +22,15 @@ namespace CoreLogicLib.Comm
                             Headless = true,
                             Args = new string[]
                             {
-                            "--no-sandbox",
-                            "--disable-setuid-sandbox"
+                                "--disable-gpu",
+                                "--disable-dev-shm-usage",
+                                "--disable-setuid-sandbox",
+                                "--no-first-run",
+                                "--no-sandbox",
+                                "--no-zygote",
+                                "--deterministic-fetch",
+                                "--disable-features=IsolateOrigins",
+                                "--disable-site-isolation-trials"
                             }
                         });
                         break;
@@ -56,7 +63,6 @@ namespace CoreLogicLib.Comm
             await newPage.SetExtraHttpHeadersAsync(SharedLib.General.Generator.GetHttpHeadersToSend());
             var pageResponse = await newPage.GoToAsync(pageURL);
             var contents = await newPage.GetContentAsync();
-            await newPage.DisposeAsync();
 
             Log.Verbose("Webpage Contents:   {WebpageContents}", contents);
             if (string.IsNullOrWhiteSpace(contents))
@@ -64,7 +70,9 @@ namespace CoreLogicLib.Comm
                 return null;
             }
             bool keywordFound = contents.Contains(keyword);
-            
+
+            await newPage.DisposeAsync();
+
             return new WebCheck()
             {
                 KeywordExists = keywordFound,
