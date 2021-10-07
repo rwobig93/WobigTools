@@ -25,12 +25,7 @@ namespace CoreLogicLib.Comm
                                 "--disable-gpu",
                                 "--disable-dev-shm-usage",
                                 "--disable-setuid-sandbox",
-                                "--no-first-run",
-                                "--no-sandbox",
-                                "--no-zygote",
-                                "--deterministic-fetch",
-                                "--disable-features=IsolateOrigins",
-                                "--disable-site-isolation-trials"
+                                "--no-sandbox"
                             }
                         });
                         break;
@@ -58,10 +53,12 @@ namespace CoreLogicLib.Comm
             {
                 await Initialize(browserType);
             }
+            //var pages = await HeadlessBrowser.PagesAsync();
+            //var url = pages[0].Url;
 
             var newPage = await HeadlessBrowser.NewPageAsync();
             await newPage.SetExtraHttpHeadersAsync(SharedLib.General.Generator.GetHttpHeadersToSend());
-            var pageResponse = await newPage.GoToAsync(pageURL);
+            var pageResponse = await newPage.GoToAsync(pageURL, 9001);
             var contents = await newPage.GetContentAsync();
 
             Log.Verbose("Webpage Contents:   {WebpageContents}", contents);

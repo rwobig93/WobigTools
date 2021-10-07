@@ -14,7 +14,7 @@ namespace CoreLogicLib.Auto
     {
         public static async Task CheckOnTrackers(TrackInterval interval)
         {
-            var randomDelay = Generator.GetRandomNumberBetween(250, 1736);
+            var randomDelay = Generator.GetRandomNumberBetween(1149, 4736);
             Log.Debug("Running Tracker Check: {Interval} + RandomDelay({RandomDelay})", interval, randomDelay);
             await Task.Delay(randomDelay);
             foreach (TrackedProduct tracker in Constants.SavedData.TrackedProducts.FindAll(x => x.CheckInterval == interval))
@@ -29,6 +29,24 @@ namespace CoreLogicLib.Auto
                 else
                 {
                     Log.Verbose("Tracker {Tracker} is disabled, skipping it", tracker.FriendlyName);
+                }
+            }
+            var leftOverPages = await WebHeadless.HeadlessBrowser.PagesAsync();
+            Log.Verbose("Cleaning up leftover pages that haven't been disposed");
+            await Task.Delay(10000);
+            foreach (var page in leftOverPages)
+            {
+                if (page is null)
+                    continue;
+                try
+                {
+                    Log.Debug("Disposed stale page: {DisposedPageUrl}", page.Url);
+                    await page.DisposeAsync();
+                    Log.Debug("Page disposed successfully");
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Page disposal failure: {Error}", ex.Message);
                 }
             }
         }
@@ -117,7 +135,7 @@ namespace CoreLogicLib.Auto
                 db.Add(newWatcherEvent);
                 await db.SaveChangesAsync();
                 WobigToolsEvents.WatcherEventTrigger(new object(), "Alert Failure");
-                Log.Error("Error on tracker: [{Tracker}]{Error}", tracker.FriendlyName, ex.Message);
+                Log.Warning("Error on tracker: [{Tracker}]{Error}", tracker.FriendlyName, ex.Message);
             }
         }
 
@@ -185,7 +203,7 @@ namespace CoreLogicLib.Auto
                 else
                 {
                     Log.Verbose("Keyword found [{KWFound}] and Validation [{KWValidation}] don't match, not alerting", webCheckResponse.KeywordExists, webCheckResponse.KeywordExists);
-                    Log.Information("Checked watcher for {TrackerName}, Keyword: {TrackerKeyword} | Alert not triggered", tracker.FriendlyName, tracker.Keyword);
+                    Log.Debug("Checked watcher for {TrackerName}, Keyword: {TrackerKeyword} | Alert not triggered", tracker.FriendlyName, tracker.Keyword);
                     newWatcherEvent.Event = "Alert Checked";
                     db.Add(newWatcherEvent);
                     await db.SaveChangesAsync();
@@ -199,7 +217,7 @@ namespace CoreLogicLib.Auto
                 db.Add(newWatcherEvent);
                 await db.SaveChangesAsync();
                 WobigToolsEvents.WatcherEventTrigger(new object(), "Alert Failure");
-                Log.Error("Error on tracker: [{Tracker}]{Error}", tracker.FriendlyName, ex.Message);
+                Log.Warning("Error on tracker: [{Tracker}]{Error}", tracker.FriendlyName, ex.Message);
             }
         }
 

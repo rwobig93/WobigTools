@@ -130,7 +130,7 @@ namespace CoreLogicLib.Standard
             Log.Information("Local Logging Set to: {LogLevel}", logLevel);
         }
 
-        internal static void ChangeLoggingLevelCloud(LogEventLevel logLevel = LogEventLevel.Warning)
+        internal static void ChangeLoggingLevelCloud(LogEventLevel logLevel = LogEventLevel.Error)
         {
             if (Constants.DebugMode)
                 logLevel = LogEventLevel.Debug;
